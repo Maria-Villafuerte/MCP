@@ -1,0 +1,1 @@
+"# Generador de Paletas de Belleza\nEste proyecto ayuda a seleccionar colores ideales para outfits."
