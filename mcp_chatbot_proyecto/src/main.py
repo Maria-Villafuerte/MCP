@@ -60,12 +60,63 @@ class MCPChatbot:
     # ============= FILESYSTEM MCP FUNCTIONS =============
     
     def mcp_read_file(self, file_path: str) -> str:
-       
+        """Leer archivo usando MCP Filesystem"""
+        try:
+            full_path = os.path.join(self.working_dir, file_path)
+            
+            if not os.path.exists(full_path):
+                result = f"❌ Archivo no encontrado: {file_path}"
+            else:
+                with open(full_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                result = f"✅ Contenido de {file_path}:\n{content}"
+            
+            self.log_mcp_interaction("READ_FILE", "filesystem", file_path, result)
+            return result
+            
+        except Exception as e:
+            error_msg = f"❌ Error leyendo archivo: {e}"
+            self.log_mcp_interaction("READ_FILE", "filesystem", file_path, error_msg)
+            return error_msg
     
     def mcp_write_file(self, file_path: str, content: str) -> str:
-        
+        """Escribir archivo usando MCP Filesystem"""
+        try:
+            full_path = os.path.join(self.working_dir, file_path)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            
+            with open(full_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            
+            result = f"✅ Archivo creado/actualizado: {file_path}"
+            self.log_mcp_interaction("WRITE_FILE", "filesystem", 
+                                   {"path": file_path, "content_length": len(content)}, result)
+            return result
+            
+        except Exception as e:
+            error_msg = f"❌ Error escribiendo archivo: {e}"
+            self.log_mcp_interaction("WRITE_FILE", "filesystem", file_path, error_msg)
+            return error_msg
+    
     def mcp_list_directory(self, dir_path: str = ".") -> str:
-       
+        """Listar directorio usando MCP Filesystem"""
+        try:
+            full_path = os.path.join(self.working_dir, dir_path)
+            
+            if not os.path.exists(full_path):
+                result = f"❌ Directorio no encontrado: {dir_path}"
+            else:
+                items = os.listdir(full_path)
+                result = f"✅ Contenido de {dir_path}:\n" + "\n".join(f"  - {item}" for item in items)
+            
+            self.log_mcp_interaction("LIST_DIR", "filesystem", dir_path, result)
+            return result
+            
+        except Exception as e:
+            error_msg = f"❌ Error listando directorio: {e}"
+            self.log_mcp_interaction("LIST_DIR", "filesystem", dir_path, error_msg)
+            return error_msg
+    
 
     def send_message(self, user_message: str) -> str:
         """Enviar mensaje a Claude con capacidades MCP"""
