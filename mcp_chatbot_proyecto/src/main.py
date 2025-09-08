@@ -198,7 +198,111 @@ class MCPChatbot:
             self.log_mcp_interaction("GIT_COMMIT", "git", {"repo": repo_name, "message": message}, error_msg)
             return error_msg
     
-       
+   # ============= COLOR PALETTE MCP FUNCTIONS =============
+    
+    def mcp_generate_color_palette(self, skin_tone: str, eye_color: str, hair_color: str,
+                                 lip_tone: str, event_type: str, season: str, style: str) -> str:
+        """Generar paleta de colores personalizada para belleza"""
+        try:
+            # Base de datos de colores para diferentes características
+            color_database = {
+                "skin_tone": {
+                    "clara": ["#F5E6D3", "#E8D4C2", "#F2E7D5"],
+                    "media": ["#D4B896", "#C1A882", "#B8956A"],
+                    "oscura": ["#8B5A3C", "#6B4423", "#4A2C17"]
+                },
+                "eye_color": {
+                    "azul": ["#4A90E2", "#2E5BBA", "#1E3A8A"],
+                    "verde": ["#10B981", "#059669", "#047857"],
+                    "cafe": ["#92400E", "#B45309", "#D97706"],
+                    "gris": ["#6B7280", "#4B5563", "#374151"]
+                },
+                "hair_color": {
+                    "rubio": ["#F59E0B", "#EAB308", "#CA8A04"],
+                    "castano": ["#92400E", "#B45309", "#D97706"],
+                    "negro": ["#1F2937", "#111827", "#000000"],
+                    "rojo": ["#DC2626", "#B91C1C", "#991B1B"]
+                },
+                "event_colors": {
+                    "casual": ["#3B82F6", "#EF4444", "#10B981", "#F59E0B"],
+                    "formal": ["#1F2937", "#374151", "#6B7280", "#9CA3AF"],
+                    "fiesta": ["#EC4899", "#8B5CF6", "#06B6D4", "#F59E0B"],
+                    "trabajo": ["#1E40AF", "#7C2D12", "#064E3B", "#92400E"]
+                }
+            }
+            
+            # Algoritmo de selección de colores
+            selected_colors = []
+            
+            # Agregar colores base según características físicas
+            if skin_tone.lower() in color_database["skin_tone"]:
+                selected_colors.extend(color_database["skin_tone"][skin_tone.lower()][:1])
+            
+            if eye_color.lower() in color_database["eye_color"]:
+                selected_colors.extend(color_database["eye_color"][eye_color.lower()][:1])
+            
+            # Agregar colores según el evento
+            if event_type.lower() in color_database["event_colors"]:
+                selected_colors.extend(color_database["event_colors"][event_type.lower()][:2])
+            
+            # Colores complementarios para pantalón y blusa
+            pants_colors = ["#1F2937", "#374151", "#92400E", "#1E40AF"]  # Tonos neutros para pantalón
+            blouse_colors = selected_colors + ["#F3F4F6", "#FEF3C7", "#DBEAFE"]  # Colores seleccionados + neutros
+            
+            # Crear resultado estructurado
+            palette_result = {
+                "input_parameters": {
+                    "skin_tone": skin_tone,
+                    "eye_color": eye_color,
+                    "hair_color": hair_color,
+                    "lip_tone": lip_tone,
+                    "event_type": event_type,
+                    "season": season,
+                    "style": style
+                },
+                "recommended_pants": [
+                    {"hex": pants_colors[0], "name": "Gris Carbón"},
+                    {"hex": pants_colors[1], "name": "Gris Medio"},
+                    {"hex": pants_colors[2], "name": "Café Chocolate"}
+                ],
+                "recommended_blouses": [
+                    {"hex": blouse_colors[0], "name": "Color Principal"},
+                    {"hex": blouse_colors[1] if len(blouse_colors) > 1 else "#F3F4F6", "name": "Color Complementario"},
+                    {"hex": blouse_colors[2] if len(blouse_colors) > 2 else "#FEF3C7", "name": "Color Acento"}
+                ]
+            }
+            
+            result = f"""✅ PALETA DE COLORES GENERADA:
+
+📋 Parámetros de entrada:
+   👤 Tono de piel: {skin_tone}
+   👁️  Color de ojos: {eye_color}
+   💇 Color de cabello: {hair_color}
+   💋 Tono de labios: {lip_tone}
+   🎭 Tipo de evento: {event_type}
+   🌞 Estación: {season}
+   ✨ Estilo: {style}
+
+👖 RECOMENDACIONES PARA PANTALÓN:
+   1. {palette_result['recommended_pants'][0]['name']}: {palette_result['recommended_pants'][0]['hex']}
+   2. {palette_result['recommended_pants'][1]['name']}: {palette_result['recommended_pants'][1]['hex']}
+   3. {palette_result['recommended_pants'][2]['name']}: {palette_result['recommended_pants'][2]['hex']}
+
+👚 RECOMENDACIONES PARA BLUSA:
+   1. {palette_result['recommended_blouses'][0]['name']}: {palette_result['recommended_blouses'][0]['hex']}
+   2. {palette_result['recommended_blouses'][1]['name']}: {palette_result['recommended_blouses'][1]['hex']}
+   3. {palette_result['recommended_blouses'][2]['name']}: {palette_result['recommended_blouses'][2]['hex']}
+"""
+            
+            self.log_mcp_interaction("GENERATE_PALETTE", "color_palette", palette_result["input_parameters"], result)
+            return result
+            
+        except Exception as e:
+            error_msg = f"❌ Error generando paleta: {e}"
+            self.log_mcp_interaction("GENERATE_PALETTE", "color_palette", "error", error_msg)
+            return error_msg
+    
+    # ============= CLAUDE INTEGRATION =============
 
     def send_message(self, user_message: str) -> str:
         """Enviar mensaje a Claude con capacidades MCP"""
