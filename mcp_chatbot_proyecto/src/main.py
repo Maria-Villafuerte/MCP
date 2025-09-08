@@ -116,7 +116,89 @@ class MCPChatbot:
             error_msg = f"❌ Error listando directorio: {e}"
             self.log_mcp_interaction("LIST_DIR", "filesystem", dir_path, error_msg)
             return error_msg
+
+    # ============= GIT MCP FUNCTIONS =============
     
+    def mcp_git_init(self, repo_name: str) -> str:
+        """Inicializar repositorio Git usando MCP"""
+        try:
+            repo_path = os.path.join(self.working_dir, repo_name)
+            os.makedirs(repo_path, exist_ok=True)
+            
+            # Cambiar al directorio del repo
+            original_dir = os.getcwd()
+            os.chdir(repo_path)
+            
+            # Ejecutar git init
+            result = subprocess.run(['git', 'init'], capture_output=True, text=True)
+            
+            # Volver al directorio original
+            os.chdir(original_dir)
+            
+            if result.returncode == 0:
+                response = f"✅ Repositorio Git inicializado: {repo_name}"
+            else:
+                response = f"❌ Error inicializando repo: {result.stderr}"
+            
+            self.log_mcp_interaction("GIT_INIT", "git", repo_name, response)
+            return response
+            
+        except Exception as e:
+            error_msg = f"❌ Error con git init: {e}"
+            self.log_mcp_interaction("GIT_INIT", "git", repo_name, error_msg)
+            return error_msg
+    
+    def mcp_git_add(self, repo_name: str, file_path: str) -> str:
+        """Agregar archivo al staging usando Git MCP"""
+        try:
+            repo_path = os.path.join(self.working_dir, repo_name)
+            original_dir = os.getcwd()
+            os.chdir(repo_path)
+            
+            result = subprocess.run(['git', 'add', file_path], capture_output=True, text=True)
+            os.chdir(original_dir)
+            
+            if result.returncode == 0:
+                response = f"✅ Archivo agregado al staging: {file_path}"
+            else:
+                response = f"❌ Error agregando archivo: {result.stderr}"
+            
+            self.log_mcp_interaction("GIT_ADD", "git", {"repo": repo_name, "file": file_path}, response)
+            return response
+            
+        except Exception as e:
+            error_msg = f"❌ Error con git add: {e}"
+            self.log_mcp_interaction("GIT_ADD", "git", {"repo": repo_name, "file": file_path}, error_msg)
+            return error_msg
+    
+    def mcp_git_commit(self, repo_name: str, message: str) -> str:
+        """Hacer commit usando Git MCP"""
+        try:
+            repo_path = os.path.join(self.working_dir, repo_name)
+            original_dir = os.getcwd()
+            os.chdir(repo_path)
+            
+            # Configurar usuario si no existe
+            subprocess.run(['git', 'config', 'user.email', 'test@example.com'], capture_output=True)
+            subprocess.run(['git', 'config', 'user.name', 'MCP Chatbot'], capture_output=True)
+            
+            result = subprocess.run(['git', 'commit', '-m', message], capture_output=True, text=True)
+            os.chdir(original_dir)
+            
+            if result.returncode == 0:
+                response = f"✅ Commit realizado: {message}"
+            else:
+                response = f"❌ Error haciendo commit: {result.stderr}"
+            
+            self.log_mcp_interaction("GIT_COMMIT", "git", {"repo": repo_name, "message": message}, response)
+            return response
+            
+        except Exception as e:
+            error_msg = f"❌ Error con git commit: {e}"
+            self.log_mcp_interaction("GIT_COMMIT", "git", {"repo": repo_name, "message": message}, error_msg)
+            return error_msg
+    
+       
 
     def send_message(self, user_message: str) -> str:
         """Enviar mensaje a Claude con capacidades MCP"""
