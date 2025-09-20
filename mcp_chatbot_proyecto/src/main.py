@@ -1,7 +1,6 @@
 import os
 import json
 import asyncio
-import subprocess
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from anthropic import Anthropic
@@ -117,88 +116,7 @@ class MCPChatbot:
             self.log_mcp_interaction("LIST_DIR", "filesystem", dir_path, error_msg)
             return error_msg
 
-    # ============= GIT MCP FUNCTIONS =============
-    
-    def mcp_git_init(self, repo_name: str) -> str:
-        """Inicializar repositorio Git usando MCP"""
-        try:
-            repo_path = os.path.join(self.working_dir, repo_name)
-            os.makedirs(repo_path, exist_ok=True)
-            
-            # Cambiar al directorio del repo
-            original_dir = os.getcwd()
-            os.chdir(repo_path)
-            
-            # Ejecutar git init
-            result = subprocess.run(['git', 'init'], capture_output=True, text=True)
-            
-            # Volver al directorio original
-            os.chdir(original_dir)
-            
-            if result.returncode == 0:
-                response = f"✅ Repositorio Git inicializado: {repo_name}"
-            else:
-                response = f"❌ Error inicializando repo: {result.stderr}"
-            
-            self.log_mcp_interaction("GIT_INIT", "git", repo_name, response)
-            return response
-            
-        except Exception as e:
-            error_msg = f"❌ Error con git init: {e}"
-            self.log_mcp_interaction("GIT_INIT", "git", repo_name, error_msg)
-            return error_msg
-    
-    def mcp_git_add(self, repo_name: str, file_path: str) -> str:
-        """Agregar archivo al staging usando Git MCP"""
-        try:
-            repo_path = os.path.join(self.working_dir, repo_name)
-            original_dir = os.getcwd()
-            os.chdir(repo_path)
-            
-            result = subprocess.run(['git', 'add', file_path], capture_output=True, text=True)
-            os.chdir(original_dir)
-            
-            if result.returncode == 0:
-                response = f"✅ Archivo agregado al staging: {file_path}"
-            else:
-                response = f"❌ Error agregando archivo: {result.stderr}"
-            
-            self.log_mcp_interaction("GIT_ADD", "git", {"repo": repo_name, "file": file_path}, response)
-            return response
-            
-        except Exception as e:
-            error_msg = f"❌ Error con git add: {e}"
-            self.log_mcp_interaction("GIT_ADD", "git", {"repo": repo_name, "file": file_path}, error_msg)
-            return error_msg
-    
-    def mcp_git_commit(self, repo_name: str, message: str) -> str:
-        """Hacer commit usando Git MCP"""
-        try:
-            repo_path = os.path.join(self.working_dir, repo_name)
-            original_dir = os.getcwd()
-            os.chdir(repo_path)
-            
-            # Configurar usuario si no existe
-            subprocess.run(['git', 'config', 'user.email', 'test@example.com'], capture_output=True)
-            subprocess.run(['git', 'config', 'user.name', 'MCP Chatbot'], capture_output=True)
-            
-            result = subprocess.run(['git', 'commit', '-m', message], capture_output=True, text=True)
-            os.chdir(original_dir)
-            
-            if result.returncode == 0:
-                response = f"✅ Commit realizado: {message}"
-            else:
-                response = f"❌ Error haciendo commit: {result.stderr}"
-            
-            self.log_mcp_interaction("GIT_COMMIT", "git", {"repo": repo_name, "message": message}, response)
-            return response
-            
-        except Exception as e:
-            error_msg = f"❌ Error con git commit: {e}"
-            self.log_mcp_interaction("GIT_COMMIT", "git", {"repo": repo_name, "message": message}, error_msg)
-            return error_msg
-    
-   # ============= COLOR PALETTE MCP FUNCTIONS =============
+    # ============= COLOR PALETTE MCP FUNCTIONS =============
     
     def mcp_generate_color_palette(self, skin_tone: str, eye_color: str, hair_color: str,
                                  lip_tone: str, event_type: str, season: str, style: str) -> str:
@@ -319,12 +237,11 @@ class MCPChatbot:
             response = self.client.messages.create(
                 model="claude-3-haiku-20240307",
                 max_tokens=1024,
-                system="""Eres un asistente especializado en belleza, moda y tecnología. Tienes acceso a herramientas MCP para:
+                system="""Eres un asistente especializado en belleza, moda y gestión de archivos. Tienes acceso a herramientas MCP para:
                 - Gestionar archivos (leer, escribir, listar)
-                - Usar Git (init, add, commit)
                 - Generar paletas de colores personalizadas
 
-                Cuando el usuario mencione archivos, repositorios o paletas de colores, sugiere usar las funciones MCP correspondientes.""",
+                Cuando el usuario mencione archivos o paletas de colores, sugiere usar las funciones MCP correspondientes.""",
                 messages=self.conversation_history
             )
             
@@ -383,25 +300,6 @@ Opciones disponibles:
             path = message[3:].strip() or "."
             return self.mcp_list_directory(path)
         
-        # Comandos Git
-        if message.startswith("/git_init "):
-            repo_name = message[10:]
-            return self.mcp_git_init(repo_name)
-        
-        if message.startswith("/git_add "):
-            parts = message[9:].split(" ", 1)
-            if len(parts) >= 2:
-                return self.mcp_git_add(parts[0], parts[1])
-            else:
-                return "❌ Uso: /git_add [repo] [archivo]"
-        
-        if message.startswith("/git_commit "):
-            parts = message[12:].split(" ", 1)
-            if len(parts) >= 2:
-                return self.mcp_git_commit(parts[0], parts[1])
-            else:
-                return "❌ Uso: /git_commit [repo] [mensaje]"
-        
         return None
     
     def show_mcp_log(self):
@@ -431,11 +329,6 @@ Opciones disponibles:
   /write [archivo] [contenido] - Escribir archivo
   /ls [directorio]            - Listar directorio
 
-🔧 GIT:
-  /git_init [repo]            - Inicializar repositorio
-  /git_add [repo] [archivo]   - Agregar archivo
-  /git_commit [repo] [msg]    - Hacer commit
-
 🎨 PALETAS DE COLORES:
   /palette [tono_piel] [color_ojos] [color_cabello] [tono_labios] [evento] [estacion] [estilo]
 
@@ -446,10 +339,8 @@ Opciones disponibles:
   /quit   - Salir
 
 💡 EJEMPLO COMPLETO:
-  /git_init mi_proyecto
-  /write mi_proyecto/README.md "# Mi Proyecto"
-  /git_add mi_proyecto README.md
-  /git_commit mi_proyecto "Primer commit"
+  /write mi_archivo.txt "Contenido del archivo"
+  /read mi_archivo.txt
   /palette clara azul rubio rosa casual verano elegante
 """
         print(help_text)
