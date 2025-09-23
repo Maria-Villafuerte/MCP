@@ -1,0 +1,56 @@
+[
+  {
+    "timestamp": "2025-09-23T13:21:41.413465",
+    "action": "create_profile",
+    "user_id": "Paquito",
+    "palette_type": null,
+    "success": true,
+    "result": null,
+    "error": null
+  },
+  {
+    "timestamp": "2025-09-23T13:26:34.990568",
+    "action": "create_profile",
+    "user_id": "MajoV1",
+    "palette_type": null,
+    "success": true,
+    "result": null,
+    "error": null
+  },
+  {
+    "timestamp": "2025-09-23T13:29:17.254074",
+    "action": "create_profile",
+    "user_id": "MajoV1",
+    "palette_type": null,
+    "success": true,
+    "result": null,
+    "error": null
+  },
+  {
+    "timestamp": "2025-09-23T13:30:56.622715",
+    "action": "create_profile",
+    "user_id": "Paco",
+    "palette_type": null,
+    "success": true,
+    "result": null,
+    "error": null
+  },
+  {
+    "timestamp": "2025-09-23T13:32:05.661110",
+    "action": "generate_palette",
+    "user_id": "Paco",
+    "palette_type": "ropa",
+    "success": true,
+    "result": null,
+    "error": null
+  },
+  {
+    "timestamp": "2025-09-23T13:32:36.933919",
+    "action": "generate_palette",
+    "user_id": "Paco",
+    "palette_type": "ropa",
+    "success": true,
+    "result": null,
+    "error": null
+  }
+]

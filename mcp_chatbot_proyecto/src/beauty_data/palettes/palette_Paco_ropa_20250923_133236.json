@@ -1,0 +1,73 @@
+{
+  "palette_id": "Paco_ropa_20250923_133236",
+  "user_id": "Paco",
+  "palette_type": "ropa",
+  "event_type": "boda",
+  "season": "primavera",
+  "colors": [
+    {
+      "hex": "#3B82F6",
+      "name": "Blusa/Camisa 1",
+      "category": "superior",
+      "usage": "Prenda principal superior"
+    },
+    {
+      "hex": "#10B981",
+      "name": "Blusa/Camisa 2",
+      "category": "superior",
+      "usage": "Prenda principal superior"
+    },
+    {
+      "hex": "#F59E0B",
+      "name": "Blusa/Camisa 3",
+      "category": "superior",
+      "usage": "Prenda principal superior"
+    },
+    {
+      "hex": "#1F2937",
+      "name": "Pantalón/Falda 1",
+      "category": "inferior",
+      "usage": "Prenda principal inferior"
+    },
+    {
+      "hex": "#374151",
+      "name": "Pantalón/Falda 2",
+      "category": "inferior",
+      "usage": "Prenda principal inferior"
+    },
+    {
+      "hex": "#6B7280",
+      "name": "Pantalón/Falda 3",
+      "category": "inferior",
+      "usage": "Prenda principal inferior"
+    },
+    {
+      "hex": "#3e6177",
+      "name": "Acento 1",
+      "category": "acento",
+      "usage": "Detalles y accesorios"
+    },
+    {
+      "hex": "#3e4577",
+      "name": "Acento 2",
+      "category": "acento",
+      "usage": "Detalles y accesorios"
+    }
+  ],
+  "recommendations": {
+    "primary_combinations": [
+      "Blusa/Camisa 1 + Pantalón/Falda 1 + Acento 1 (acento)",
+      "Blusa/Camisa 1 + Pantalón/Falda 2 + Acento 1 (acento)",
+      "Blusa/Camisa 2 + Pantalón/Falda 1 + Acento 1 (acento)",
+      "Blusa/Camisa 2 + Pantalón/Falda 2 + Acento 1 (acento)"
+    ],
+    "alternative_options": [],
+    "styling_tips": [],
+    "color_harmony_analysis": "Paleta análoga - Colores armoniosos y tranquilos",
+    "seasonal_adjustments": [
+      "Ilumina la paleta con tonos más vibrantes",
+      "Agrega toques de colores frescos"
+    ]
+  },
+  "created_at": "2025-09-23T13:32:36.933462"
+}
