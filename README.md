@@ -1,212 +1,293 @@
-# MCP Chatbot - Model Context Protocol Implementation
+# MCPChatbot - Sistema de Belleza con Claude API
 
-A comprehensive chatbot implementation that integrates Claude API with various MCP (Model Context Protocol) servers, providing filesystem operations, Git version control, and custom beauty color palette generation capabilities.
+Un sistema de chat inteligente especializado en belleza y estilo personal, construido con arquitectura MVC y capacidades MCP (Model Context Protocol).
 
-## Features
+##  Características Principales
 
-### Core Functionality
-- **Claude API Integration**: Direct communication with Anthropic's Claude API
-- **Context Management**: Maintains conversation history throughout sessions
-- **MCP Logging System**: Comprehensive logging of all MCP server interactions
-- **Interactive Console Interface**: User-friendly command-line interface
+### Sistema de Belleza Avanzado
+- **Perfiles Personalizados**: Crea perfiles basados en tono de piel, color de ojos, tipo de cabello y preferencias de estilo
+- **Paletas de Colores Inteligentes**: Generación automática de paletas para ropa, maquillaje y accesorios
+- **Teoría del Color**: Algoritmos avanzados basados en colorimetría y armonías de color
+- **Recomendaciones Contextuales**: Sugerencias específicas según evento, estación y estilo personal
 
-### MCP Server Capabilities
+### Integración con Claude API
+- **Conversación Natural**: Chat fluido con Claude Haiku para consejos de belleza y estilo
+- **Contexto Personalizado**: Claude considera tu perfil personal en las recomendaciones
+- **Análisis Inteligente**: Evaluación de compatibilidad de colores y tendencias
 
-#### Filesystem Operations
-- **File Reading**: Read content from files in the workspace
-- **File Writing**: Create and modify files with custom content
-- **Directory Listing**: Browse directory structures
+### Funcionalidades Adicionales
+- **Citas Inspiracionales**: Conexión con servidor remoto para motivación diaria
+- **Gestión de Archivos**: Sistema completo de archivos con soporte Git
+- **Historial Completo**: Seguimiento de paletas generadas y preferencias
+- **Logging Avanzado**: Registro detallado de todas las interacciones
 
-#### Git Version Control
-- **Repository Initialization**: Create new Git repositories
-- **File Staging**: Add files to Git staging area
-- **Commit Operations**: Create commits with custom messages
+## 🏗️ Arquitectura
 
-#### Beauty Color Palette Generator
-- **Personalized Color Recommendations**: Generate custom color palettes based on:
-  - Skin tone (clara, media, oscura)
-  - Eye color (azul, verde, cafe, gris)
-  - Hair color (rubio, castano, negro, rojo)
-  - Lip tone
-  - Event type (casual, formal, fiesta, trabajo)
-  - Season (primavera, verano, otoño, invierno)
-  - Style preferences
-- **Clothing Recommendations**: Specific suggestions for pants and blouses with hex color codes
+### Estructura MVC
+```
+src/
+├── models/                 # Modelos de datos
+│   ├── session_model.py   # Gestión de sesiones
+│   ├── beauty_model.py    # Datos de belleza y perfiles
+│   └── logging_model.py   # Sistema de logging
+├── views/                 # Interfaces de usuario
+│   ├── chat_view.py      # Vista principal del chat
+│   └── beauty_view.py    # Vista del sistema de belleza
+├── controllers/           # Lógica de control
+│   ├── main_controller.py     # Controlador principal
+│   ├── beauty_controller.py   # Controlador de belleza
+│   ├── quotes_controller.py   # Controlador de citas
+│   └── git_controller.py      # Controlador de archivos/git
+├── services/              # Servicios especializados
+│   ├── claude_service.py      # Servicio de Claude API
+│   ├── beauty_service.py      # Servicio de paletas avanzado
+│   └── remote_quotes_service.py # Servicio de citas remotas
+└── main.py               # Punto de entrada
+```
 
-## Installation
+## 🚀 Instalación
 
-### Prerequisites
-- Python 3.8 or higher
-- Git (for Git MCP functionality)
-- Anthropic API key
+### Prerrequisitos
+- Python 3.8 o superior
+- Cuenta de Anthropic con API key
+- Git (opcional, para control de versiones)
 
-### Setup
+### Pasos de Instalación
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repository-url>
-   cd mcp-chatbot
-   ```
+1. **Clonar el repositorio**
+```bash
+git clone https://github.com/Maria-Villafuerte/MCP.git
+cd MCP
+```
 
-2. **Install dependencies**
-   ```bash
-   pip install anthropic python-dotenv
-   ```
+2. **Crear entorno virtual**
+```bash
+python -m venv venv
+source venv/bin/activate  # En Windows: venv\Scripts\activate
+```
 
-3. **Configure environment variables**
-   ```bash
-   # The script will create a .env file automatically on first run
-   # Edit the .env file and add your Anthropic API key:
-   ANTHROPIC_API_KEY=your_api_key_here
-   ```
+3. **Instalar dependencias**
+```bash
+pip install -r requirements.txt
+```
 
-4. **Get your Anthropic API key**
-   - Visit [Anthropic Console](https://console.anthropic.com/)
-   - Create an account (get $5 free credits)
-   - Generate an API key
-   - Add it to your `.env` file
+4. **Configurar variables de entorno**
+```bash
+cp .env.example .env
+# Editar .env con tu API key de Anthropic
+```
 
-## 💻 Usage
-
-### Starting the Chatbot
+5. **Ejecutar el sistema**
 ```bash
 python main.py
 ```
 
-### Available Commands
+## ⚙️ Configuración
 
-#### System Commands
-- `/help` - Display all available commands
-- `/log` - Show MCP interaction history
-- `/clear` - Clear conversation context
-- `/quit` - Exit the chatbot
-
-#### Filesystem Operations
-- `/read [filename]` - Read file content
-- `/write [filename] [content]` - Write content to file
-- `/ls [directory]` - List directory contents (default: current directory)
-
-#### Git Operations
-- `/git_init [repo_name]` - Initialize a new Git repository
-- `/git_add [repo_name] [filename]` - Add file to staging area
-- `/git_commit [repo_name] [message]` - Create a commit with message
-
-#### Color Palette Generation
+### Variables de Entorno (.env)
 ```bash
-/palette [skin_tone] [eye_color] [hair_color] [lip_tone] [event] [season] [style]
+# API Key de Anthropic (REQUERIDO)
+ANTHROPIC_API_KEY=tu_api_key_aqui
+
+# Modelo de Claude (opcional)
+CLAUDE_MODEL=claude-3-haiku-20240307
+
+# Configuración de logging (opcional)
+LOG_LEVEL=INFO
 ```
 
-**Example:**
+### Configuración Avanzada
+- **Modelos disponibles**: claude-3-haiku-20240307, claude-3-sonnet-20240229, claude-3-opus-20240229
+- **Directorio de trabajo**: Se crea automáticamente en `mcp_workspace/`
+- **Logs**: Se guardan en el directorio `logs/`
+- **Sesiones**: Se almacenan en `sessions/`
+- **Datos de belleza**: Se guardan en `beauty_data/`
+
+##  Comandos Principales
+
+### Sistema de Belleza
 ```bash
-/palette clara azul rubio rosa casual verano elegante
+# Gestión de perfiles
+/beauty create_profile          # Crear perfil personalizado
+/beauty profile <user_id>       # Ver perfil específico
+/beauty list_profiles           # Listar todos los perfiles
+/beauty history <user_id>       # Ver historial de paletas
+
+# Generación de paletas
+/palette ropa <user_id> <evento>        # Paleta de ropa
+/palette maquillaje <user_id> <evento>  # Paleta de maquillaje
+/palette accesorios <user_id> <evento>  # Paleta de accesorios
+/palette quick <tipo> <evento>          # Paleta rápida sin perfil
 ```
 
-**Available Options:**
-- **Skin tones**: clara, media, oscura
-- **Eye colors**: azul, verde, cafe, gris
-- **Hair colors**: rubio, castano, negro, rojo
-- **Events**: casual, formal, fiesta, trabajo
-- **Seasons**: primavera, verano, otoño, invierno
-
-## Project Structure
-
-```
-mcp-chatbot/
-├── main.py              # Main chatbot implementation
-├── .env                 # Environment variables (auto-generated)
-├── mcp_workspace/       # Working directory for file operations
-├── README.md           # This file
-└── requirements.txt    # Python dependencies (if needed)
-```
-
-## Usage Examples
-
-### Complete Workflow Example
+### Citas Inspiracionales
 ```bash
-# Start the chatbot
+/quotes get [categoría]      # Obtener cita inspiracional
+/quotes tip                  # Consejo de belleza/bienestar
+/quotes search <palabra>     # Buscar citas
+/quotes wisdom               # Sabiduría diaria
+```
+
+### Gestión de Archivos
+```bash
+# Filesystem
+/fs read <archivo>           # Leer archivo
+/fs write <archivo> <texto>  # Escribir archivo
+/fs list [directorio]        # Listar contenido
+
+# Git (si está disponible)
+/git init                    # Inicializar repositorio
+/git add <archivo>           # Agregar al staging
+/git commit "<mensaje>"      # Hacer commit
+/git status                  # Ver estado
+```
+
+### Sistema
+```bash
+/help                        # Ayuda completa
+/stats                       # Estadísticas de uso
+/log                         # Ver log de interacciones
+/context                     # Ver contexto actual
+/clear                       # Limpiar contexto
+/save                        # Guardar sesión
+/quit                        # Salir
+```
+
+##  Ejemplos de Uso
+
+### Crear Perfil Personal
+```bash
+Usuario: /beauty create_profile
+
+Sistema:  CREACIÓN DE PERFIL DE BELLEZA
+=========================================
+ ID de usuario: maria_123
+ Nombre completo: María García
+ Tono de piel: 
+  1. clara
+  2. media  
+  3. oscura
+Selección: 2
+
+[Continúa recopilando datos...]
+```
+
+### Generar Paleta de Ropa
+```bash
+Usuario: /palette ropa maria_123 trabajo
+
+Sistema:  PREFERENCIAS PARA PALETA DE ROPA
+Evento: Trabajo
+ Estación del año:
+  1. primavera
+  2. verano
+  3. otoño
+  4. invierno
+Selección: 2
+
+[Genera paleta personalizada...]
+```
+
+### Conversación Natural
+```bash
+Usuario: ¿Qué colores me quedan bien para una entrevista de trabajo?
+
+Claude: Para una entrevista de trabajo, te recomiendo colores que proyecten 
+profesionalismo y confianza. ¿Tienes un perfil creado? Esto me ayudaría 
+a darte recomendaciones más precisas basadas en tu tono de piel y 
+características personales.
+
+Para recomendaciones generales:
+- Azul marino: transmite confianza y estabilidad
+- Gris carbón: elegante y profesional
+- Blanco o crema: limpio y sofisticado
+
+¿Te gustaría crear un perfil personal con /beauty create_profile para 
+obtener recomendaciones más específicas?
+```
+
+## 🔧 Desarrollo
+
+### Estructura de Clases Principales
+
+#### BeautyService
+- `generate_advanced_palette()`: Generación de paletas con algoritmos avanzados
+- `ColorTheoryEngine`: Motor de teoría del color
+- `PaletteGenerator`: Generador específico por categoría
+
+#### ClaudeService
+- `send_message()`: Comunicación con Claude API
+- `send_beauty_context_message()`: Mensajes con contexto de belleza
+- `analyze_color_compatibility()`: Análisis de compatibilidad de colores
+
+#### BeautyModel
+- `BeautyProfile`: Dataclass para perfiles de usuario
+- `ColorPalette`: Dataclass para paletas generadas
+- Base de datos de colores y características
+
+### Testing
+```bash
+# Ejecutar tests individuales
+python src/models/beauty_model.py
+python src/services/claude_service.py
+python src/controllers/beauty_controller.py
+
+# Tests con pytest (si está instalado)
+pytest tests/
+```
+
+## 🌐 Servidor Remoto
+
+El sistema se conecta a un servidor MCP remoto para citas inspiracionales:
+- **Funcionalidad**: Citas, consejos de bienestar, sabiduría diaria
+- **Fallback**: Si no está disponible, usa citas locales
+
+## 📊 Monitoreo y Logs
+
+### Tipos de Logs
+- **Interacciones generales**: `logs/interactions.log`
+- **Interacciones MCP**: `logs/mcp_interactions.json`
+- **Sistema de belleza**: `logs/beauty_interactions.json`
+- **Errores**: `logs/errors.log`
+
+### Estadísticas Disponibles
+- Número de perfiles creados
+- Paletas generadas por tipo y evento
+- Tasa de éxito de operaciones MCP
+- Tiempo de sesión y mensajes procesados
+
+## 🛠️ Solución de Problemas
+
+### Errores Comunes
+
+**Error: ANTHROPIC_API_KEY no encontrada**
+```bash
+# Verifica que el archivo .env existe y contiene la API key
+cat .env
+# Debe mostrar: ANTHROPIC_API_KEY=tu_api_key_aqui
+```
+
+**Error: Servidor remoto no disponible**
+```bash
+# El sistema funciona en modo fallback con citas locales
+# Verifica conexión a internet y estado del servidor con:
+/quotes status
+```
+
+**Error: Git no disponible**
+```bash
+# Instala Git en tu sistema:
+# Windows: https://git-scm.com/download/win
+# macOS: brew install git
+# Linux: apt-get install git
+```
+
+### Logging de Depuración
+```bash
+# Activar logging detallado
+export LOG_LEVEL=DEBUG
 python main.py
 
-# Create a new project
-/git_init my_beauty_app
-
-# Create a README file
-/write my_beauty_app/README.md "# Beauty Color Palette App"
-
-# Add file to Git
-/git_add my_beauty_app README.md
-
-# Commit changes
-/git_commit my_beauty_app "Initial commit: Add README"
-
-# Generate a color palette
-/palette clara azul rubio rosa fiesta verano elegante
-
-# Check the interaction log
-/log
+# Ver logs en tiempo real
+tail -f logs/interactions.log
 ```
-
-### Natural Language Interaction
-You can also interact with the chatbot using natural language:
-```
-"Can you help me choose colors for a formal event?"
-"What files do I have in my project?"
-"Tell me about version control best practices"
-```
-
-## Architecture
-
-The chatbot implements the MCP (Model Context Protocol) architecture with three main components:
-
-- **Host (Anfitrión)**: The main chatbot application that coordinates multiple MCP clients
-- **Client**: Components that maintain connections with MCP servers
-- **Server**: Tools that execute specific actions (filesystem, git, color palette generation)
-
-## Technical Details
-
-### MCP Protocol Implementation
-- Uses JSON-RPC for communication
-- Implements local MCP servers
-- Maintains comprehensive interaction logging
-- Provides error handling and user feedback
-
-### API Integration
-- Anthropic Claude API integration
-- Context-aware conversations
-- Error handling and connection management
-
-## Troubleshooting
-
-### Common Issues
-
-1. **API Key Error**
-   ```
-   Error: ANTHROPIC_API_KEY no encontrada en variables de entorno
-   ```
-   **Solution**: Ensure your `.env` file contains a valid Anthropic API key
-
-2. **Git Command Failures**
-   ```
-   Error con git init: [git] command not found
-   ```
-   **Solution**: Install Git on your system
-
-3. **File Permission Errors**
-   **Solution**: Ensure the script has write permissions in the working directory
-
-
-
-### Implemented Features 
-- [x] Claude API connection and context management
-- [x] MCP interaction logging system
-- [x] Filesystem MCP server (local)
-- [x] Git MCP server (local)
-- [x] Custom Color Palette MCP server (local)
-- [x] Interactive console interface
-- [x] Comprehensive error handling
-
-### Upcoming Features 
-- [ ] Integration with external MCP servers
-- [ ] Remote MCP server implementation
-- [ ] Network communication analysis
-- [ ] Enhanced UI/UX improvements
-
