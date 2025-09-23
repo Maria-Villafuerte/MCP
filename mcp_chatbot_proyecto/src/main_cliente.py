@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-Cliente MCP que se conecta al servidor local
+Cliente MCP que se conecta al servidor local via stdio
 """
 
 import asyncio
-import httpx
 import json
 import os
 import sys
+import subprocess
 from pathlib import Path
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 # Agregar src al path para imports de vistas
 src_path = Path(__file__).parent / "src"
@@ -18,41 +19,153 @@ sys.path.insert(0, str(src_path))
 from views.chat_view import ChatView
 from views.beauty_view import BeautyView
 
-class RemoteClient:
-    def __init__(self, server_url: str = "http://localhost:8000"):
-        """Inicializar cliente remoto"""
-        self.server_url = server_url
+class MCPClient:
+    def __init__(self, server_script: str = "server_local.py"):
+        """Inicializar cliente MCP"""
+        self.server_script = server_script
         self.session_id = f"client_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.chat_view = ChatView()
         self.beauty_view = BeautyView()
-        self.client = None
+        self.server_process = None
+        self.message_id = 0
+        self.conversation_history = []
     
     async def initialize(self) -> bool:
-        """Verificar conexión con servidor"""
+        """Inicializar conexión con servidor MCP"""
         try:
-            self.client = httpx.AsyncClient(timeout=30.0)
+            # Verificar que el script del servidor existe
+            if not Path(self.server_script).exists():
+                print(f"❌ No se encuentra el servidor: {self.server_script}")
+                return False
             
-            # Test de conexión
-            response = await self.client.get(f"{self.server_url}/health")
-            health = response.json()
+            # Iniciar proceso del servidor
+            self.server_process = subprocess.Popen(
+                [sys.executable, self.server_script],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
             
-            if health["status"] == "healthy":
-                print("✅ Conectado al servidor local")
+            # Inicializar conexión MCP
+            if await self._initialize_mcp():
+                print("✅ Conectado al servidor MCP local")
                 return True
             else:
-                print("⚠️ Servidor local no saludable")
+                print("❌ Error inicializando protocolo MCP")
                 return False
                 
         except Exception as e:
-            print(f" No se pudo conectar al servidor local: {str(e)}")
-            print("💡 Asegúrate de que el servidor esté corriendo con: python3 server_local.py")
+            print(f"❌ Error conectando al servidor: {str(e)}")
             return False
     
+    async def _initialize_mcp(self) -> bool:
+        """Inicializar protocolo MCP con el servidor"""
+        try:
+            # Enviar mensaje de inicialización
+            init_message = {
+                "jsonrpc": "2.0",
+                "id": self._next_id(),
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": "2024-11-05",
+                    "capabilities": {
+                        "tools": {}
+                    },
+                    "clientInfo": {
+                        "name": "MCPChatbot-Client",
+                        "version": "1.0.0"
+                    }
+                }
+            }
+            
+            response = await self._send_mcp_request(init_message)
+            
+            if response and "result" in response:
+                # Enviar notificación initialized
+                initialized_notification = {
+                    "jsonrpc": "2.0",
+                    "method": "notifications/initialized"
+                }
+                await self._send_mcp_notification(initialized_notification)
+                return True
+            
+            return False
+            
+        except Exception as e:
+            print(f"Error en inicialización MCP: {e}")
+            return False
+    
+    def _next_id(self) -> int:
+        """Generar siguiente ID de mensaje"""
+        self.message_id += 1
+        return self.message_id
+    
+    async def _send_mcp_request(self, message: Dict) -> Optional[Dict]:
+        """Enviar request MCP y obtener respuesta"""
+        try:
+            if not self.server_process:
+                return None
+            
+            # Enviar mensaje
+            message_str = json.dumps(message) + "\n"
+            self.server_process.stdin.write(message_str)
+            self.server_process.stdin.flush()
+            
+            # Leer respuesta
+            response_line = self.server_process.stdout.readline()
+            if response_line:
+                return json.loads(response_line.strip())
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error enviando request MCP: {e}")
+            return None
+    
+    async def _send_mcp_notification(self, message: Dict) -> None:
+        """Enviar notificación MCP (sin respuesta esperada)"""
+        try:
+            if not self.server_process:
+                return
+            
+            message_str = json.dumps(message) + "\n"
+            self.server_process.stdin.write(message_str)
+            self.server_process.stdin.flush()
+            
+        except Exception as e:
+            print(f"Error enviando notification MCP: {e}")
+    
+    async def _call_mcp_tool(self, tool_name: str, arguments: Dict) -> Optional[str]:
+        """Llamar herramienta MCP"""
+        try:
+            request = {
+                "jsonrpc": "2.0",
+                "id": self._next_id(),
+                "method": "tools/call",
+                "params": {
+                    "name": tool_name,
+                    "arguments": arguments
+                }
+            }
+            
+            response = await self._send_mcp_request(request)
+            
+            if response and "result" in response:
+                content = response["result"]["content"]
+                if content and len(content) > 0:
+                    return content[0]["text"]
+            
+            return "No se recibió respuesta del servidor"
+            
+        except Exception as e:
+            return f"Error llamando herramienta MCP: {str(e)}"
+    
     async def run_interactive_mode(self):
-        """Ejecutar modo interactivo conectado al servidor"""
+        """Ejecutar modo interactivo conectado al servidor MCP"""
         # Mostrar mensaje de bienvenida
         self.chat_view.show_welcome_message()
-        print(f"🔗 Conectado a servidor: {self.server_url}")
+        print(f"🔗 Conectado a servidor MCP: {self.server_script}")
         print(f"🆔 ID de sesión: {self.session_id}\n")
         
         while True:
@@ -85,37 +198,23 @@ class RemoteClient:
     async def process_user_input(self, user_input: str) -> str:
         """Procesar entrada del usuario"""
         try:
+            # Agregar al historial
+            self.conversation_history.append({"role": "user", "content": user_input})
+            
             # Verificar comandos especiales
             if user_input.startswith('/'):
                 return await self.process_special_command(user_input)
             
-            # Procesar mensaje normal
-            return await self.send_chat_message(user_input)
+            # Procesar mensaje normal con Claude via MCP
+            response = await self._call_mcp_tool("chat", {"message": user_input})
+            
+            if response:
+                self.conversation_history.append({"role": "assistant", "content": response})
+            
+            return response or "No se pudo obtener respuesta"
             
         except Exception as e:
-            return f" Error procesando mensaje: {str(e)}"
-    
-    async def send_chat_message(self, message: str) -> str:
-        """Enviar mensaje de chat al servidor"""
-        try:
-            response = await self.client.post(
-                f"{self.server_url}/chat",
-                json={
-                    "message": message,
-                    "session_id": self.session_id
-                }
-            )
-            response.raise_for_status()
-            
-            data = response.json()
-            return data["response"]
-            
-        except httpx.RequestError as e:
-            return f" Error de conexión: {str(e)}"
-        except httpx.HTTPStatusError as e:
-            return f" Error del servidor: {e.response.status_code}"
-        except Exception as e:
-            return f" Error: {str(e)}"
+            return f"❌ Error procesando mensaje: {str(e)}"
     
     async def process_special_command(self, command: str) -> str:
         """Procesar comandos especiales"""
@@ -126,8 +225,13 @@ class RemoteClient:
             return self.chat_view.get_help_message()
         elif command_lower == '/quit':
             return "👋 Cerrando cliente..."
+        elif command_lower == '/context':
+            return self._show_context_summary()
+        elif command_lower == '/clear':
+            self.conversation_history = []
+            return "🧹 Contexto limpiado"
         
-        # Comandos que requieren servidor
+        # Comandos que requieren servidor MCP
         elif command_lower.startswith('/beauty') or command_lower.startswith('/palette'):
             return await self.handle_beauty_command(command)
         elif command_lower.startswith('/quotes'):
@@ -135,14 +239,48 @@ class RemoteClient:
         elif command_lower.startswith('/git') or command_lower.startswith('/fs'):
             return await self.handle_git_command(command)
         elif command_lower == '/stats':
-            return await self.get_session_stats()
-        elif command_lower == '/clear':
-            return await self.clear_session()
+            return self._get_local_stats()
         else:
-            return f" Comando desconocido: {command}. Usa /help para ver comandos disponibles"
+            return f"❌ Comando desconocido: {command}. Usa /help para ver comandos disponibles"
+    
+    def _show_context_summary(self) -> str:
+        """Mostrar resumen del contexto local"""
+        if not self.conversation_history:
+            return "ℹ️ No hay mensajes en el contexto actual"
+        
+        summary = "\n📋 RESUMEN DEL CONTEXTO ACTUAL:\n"
+        summary += "-" * 40 + "\n"
+        
+        # Mostrar últimos 5 mensajes
+        recent_messages = self.conversation_history[-5:]
+        for i, msg in enumerate(recent_messages, 1):
+            role_icon = "👤" if msg["role"] == "user" else "🤖"
+            content_preview = msg["content"][:60] + "..." if len(msg["content"]) > 60 else msg["content"]
+            summary += f"{i}. {role_icon} {content_preview}\n"
+        
+        total_messages = len(self.conversation_history)
+        user_messages = len([m for m in self.conversation_history if m["role"] == "user"])
+        assistant_messages = len([m for m in self.conversation_history if m["role"] == "assistant"])
+        
+        summary += f"\n📊 Total: {total_messages} mensajes | Usuario: {user_messages} | Asistente: {assistant_messages}"
+        
+        return summary
+    
+    def _get_local_stats(self) -> str:
+        """Obtener estadísticas locales"""
+        total_messages = len(self.conversation_history)
+        user_messages = len([m for m in self.conversation_history if m["role"] == "user"])
+        assistant_messages = len([m for m in self.conversation_history if m["role"] == "assistant"])
+        
+        return f"""📊 ESTADÍSTICAS DE SESIÓN:
+💬 Total mensajes: {total_messages}
+👤 Mensajes usuario: {user_messages}  
+🤖 Mensajes asistente: {assistant_messages}
+🆔 ID de sesión: {self.session_id}
+🔗 Servidor: {self.server_script}"""
     
     async def handle_beauty_command(self, command: str) -> str:
-        """Manejar comandos de belleza"""
+        """Manejar comandos de belleza via MCP"""
         try:
             parts = command.strip().split()
             if len(parts) < 2:
@@ -157,254 +295,187 @@ class RemoteClient:
                 return await self.create_profile_interactive()
             
             elif action == "list_profiles":
-                response = await self.client.get(f"{self.server_url}/beauty/profiles")
-                response.raise_for_status()
-                data = response.json()
-                return self.beauty_view.show_profile_list(data["profiles"])
+                # Usar git_command para ejecutar comando beauty
+                return await self._call_mcp_tool("git_command", {"command": "/beauty list_profiles"})
             
             elif action == "profile":
                 if len(parts) < 3:
-                    return " Especifica user_id. Uso: /beauty profile <user_id>"
+                    return "❌ Especifica user_id. Uso: /beauty profile <user_id>"
                 
-                user_id = parts[2]
-                response = await self.client.get(f"{self.server_url}/beauty/profile/{user_id}")
-                if response.status_code == 404:
-                    return f" Perfil '{user_id}' no encontrado"
-                response.raise_for_status()
-                
-                profile_data = response.json()
-                # Convertir a formato de perfil para la vista
-                from models.beauty_model import BeautyProfile
-                profile = BeautyProfile(**profile_data)
-                return self.beauty_view.show_profile(profile)
+                full_command = " ".join(parts)
+                return await self._call_mcp_tool("git_command", {"command": full_command})
             
             elif action == "history":
                 if len(parts) < 3:
-                    return " Especifica user_id. Uso: /beauty history <user_id>"
+                    return "❌ Especifica user_id. Uso: /beauty history <user_id>"
                 
-                user_id = parts[2]
-                response = await self.client.get(f"{self.server_url}/beauty/history/{user_id}")
-                response.raise_for_status()
-                data = response.json()
-                
-                return f"📊 HISTORIAL DE {user_id.upper()}:\n\n" + \
-                       f"Total de paletas: {data['total_palettes']}\n\n" + \
-                       "\n".join([f"{i+1}. {p['palette_type']} - {p['event_type']} ({p['created_at'][:10]})" 
-                                 for i, p in enumerate(data['palettes'][:10])])
+                full_command = " ".join(parts)
+                return await self._call_mcp_tool("git_command", {"command": full_command})
             
             # Comandos de paleta
             elif command.startswith("/palette"):
                 return await self.handle_palette_command(command)
             
             else:
-                return f" Acción desconocida: {action}"
+                # Pasar comando completo al servidor
+                return await self._call_mcp_tool("git_command", {"command": command})
                 
-        except httpx.RequestError as e:
-            return f" Error de conexión: {str(e)}"
-        except httpx.HTTPStatusError as e:
-            return f" Error del servidor: {e.response.status_code}"
         except Exception as e:
-            return f" Error: {str(e)}"
+            return f"❌ Error: {str(e)}"
     
     async def create_profile_interactive(self) -> str:
-        """Crear perfil de forma interactiva"""
+        """Crear perfil de forma interactiva usando MCP"""
         try:
             # Recopilar datos usando la vista existente
             profile_data = self.beauty_view.collect_profile_data()
             
             if not profile_data:
-                return " Creación de perfil cancelada"
+                return "ℹ️ Creación de perfil cancelada"
             
-            # Enviar al servidor
-            response = await self.client.post(
-                f"{self.server_url}/beauty/profile",
-                json=profile_data
-            )
-            response.raise_for_status()
+            # Usar la herramienta MCP create_profile
+            response = await self._call_mcp_tool("create_profile", profile_data)
             
-            result = response.json()
-            if result["success"]:
-                return f"✅ Perfil creado exitosamente!\n\n" + \
-                       f"🆔 User ID: {result['profile']['user_id']}\n" + \
-                       f"👤 Nombre: {result['profile']['name']}\n" + \
-                       f"📅 Creado: {result['profile']['created_at'][:19]}\n\n" + \
-                       "💄 Ahora puedes generar paletas con /palette"
+            if response and "creado" in response.lower():
+                return f"✅ {response}\n\n💄 Ahora puedes generar paletas con /palette"
             else:
-                return f" Error creando perfil: {result.get('error', 'Error desconocido')}"
+                return f"❌ Error creando perfil: {response}"
                 
         except Exception as e:
-            return f" Error: {str(e)}"
+            return f"❌ Error: {str(e)}"
     
     async def handle_palette_command(self, command: str) -> str:
-        """Manejar generación de paletas"""
+        """Manejar generación de paletas via MCP"""
         try:
             parts = command.strip().split()
             
             if len(parts) < 4:
-                return " Uso: /palette <tipo> <user_id> <evento>\nTipos: ropa, maquillaje, accesorios"
+                return "❌ Uso: /palette <tipo> <user_id> <evento>\nTipos: ropa, maquillaje, accesorios"
             
             palette_type = parts[1].lower()
             user_id = parts[2]
             event_type = parts[3] if len(parts) > 3 else "casual"
             
             if palette_type not in ["ropa", "maquillaje", "accesorios"]:
-                return " Tipo no válido. Opciones: ropa, maquillaje, accesorios"
+                return "❌ Tipo no válido. Opciones: ropa, maquillaje, accesorios"
             
             # Recopilar preferencias adicionales
+            self.chat_view.show_info(f"Generando paleta {palette_type} para {event_type}...")
             preferences = self.beauty_view.collect_palette_preferences(palette_type, event_type)
             
-            # Enviar al servidor
-            response = await self.client.post(
-                f"{self.server_url}/beauty/palette",
-                json={
-                    "user_id": user_id,
-                    "palette_type": palette_type,
-                    "event_type": event_type,
-                    "preferences": preferences
-                }
-            )
+            # Construir comando completo
+            full_command = f"/palette {palette_type} {user_id} {event_type}"
             
-            if response.status_code == 404:
-                return f" Perfil '{user_id}' no encontrado"
+            # Usar git_command para ejecutar el comando de paleta
+            response = await self._call_mcp_tool("git_command", {"command": full_command})
             
-            response.raise_for_status()
-            result = response.json()
-            
-            if result["success"]:
-                # Mostrar paleta usando la vista existente
-                from models.beauty_model import ColorPalette
-                palette = ColorPalette(**result["palette"])
-                return self.beauty_view.show_palette(palette)
-            else:
-                return f" Error generando paleta: {result.get('error', 'Error desconocido')}"
+            return response or "❌ No se pudo generar la paleta"
                 
         except Exception as e:
-            return f" Error: {str(e)}"
+            return f"❌ Error: {str(e)}"
     
     async def handle_quotes_command(self, command: str) -> str:
-        """Manejar comandos de citas"""
+        """Manejar comandos de citas via MCP"""
         try:
             parts = command.strip().split()
             if len(parts) < 2:
-                return " Uso: /quotes <acción> [parámetros]"
+                return "❌ Uso: /quotes <acción> [parámetros]"
             
             action = parts[1].lower()
             
             if action == "get":
                 category = parts[2] if len(parts) > 2 else None
-                params = {"category": category} if category else {}
-                
-                response = await self.client.get(f"{self.server_url}/quotes/get", params=params)
-                response.raise_for_status()
-                data = response.json()
-                return data["quote"]
+                return await self._call_mcp_tool("get_quote", {"category": category} if category else {})
             
             elif action == "search":
                 if len(parts) < 3:
-                    return " Uso: /quotes search <término>"
+                    return "❌ Uso: /quotes search <término>"
                 
-                query = " ".join(parts[2:])
-                response = await self.client.get(f"{self.server_url}/quotes/search/{query}")
-                response.raise_for_status()
-                data = response.json()
-                return data["results"]
+                # Usar git_command para comandos complejos
+                return await self._call_mcp_tool("git_command", {"command": command})
             
             elif action == "wisdom":
-                response = await self.client.get(f"{self.server_url}/quotes/wisdom")
-                response.raise_for_status()
-                data = response.json()
-                return data["wisdom"]
+                return await self._call_mcp_tool("git_command", {"command": "/quotes wisdom"})
+            
+            elif action == "help":
+                return """SISTEMA DE CITAS INSPIRACIONALES
+
+COMANDOS DISPONIBLES:
+  /quotes help                 - Mostrar esta ayuda
+  /quotes get [categoría]      - Obtener cita inspiracional
+  /quotes search <palabra>     - Buscar citas por palabra clave
+  /quotes wisdom               - Obtener sabiduría diaria
+
+CATEGORÍAS DISPONIBLES:
+  motivacion, belleza, confianza, éxito, amor, vida, inspiracion
+
+EJEMPLOS DE USO:
+  /quotes get motivacion
+  /quotes search belleza
+  /quotes wisdom"""
             
             else:
-                return " Acciones disponibles: get, search, wisdom"
+                return "❌ Acciones disponibles: get, search, wisdom, help"
                 
         except Exception as e:
-            return f" Error: {str(e)}"
+            return f"❌ Error: {str(e)}"
     
     async def handle_git_command(self, command: str) -> str:
-        """Manejar comandos de git"""
+        """Manejar comandos de git/filesystem via MCP"""
         try:
-            response = await self.client.post(
-                f"{self.server_url}/git/command",
-                json={"command": command}
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data["result"]
+            return await self._call_mcp_tool("git_command", {"command": command})
             
         except Exception as e:
-            return f" Error: {str(e)}"
-    
-    async def get_session_stats(self) -> str:
-        """Obtener estadísticas de sesión"""
-        try:
-            response = await self.client.get(f"{self.server_url}/sessions/{self.session_id}/stats")
-            if response.status_code == 404:
-                return " No hay estadísticas de sesión disponibles"
-            
-            response.raise_for_status()
-            stats = response.json()
-            
-            return f"""📊 ESTADÍSTICAS DE SESIÓN:
-💬 Total mensajes: {stats['total_messages']}
-👤 Mensajes usuario: {stats['user_messages']}  
-🤖 Mensajes asistente: {stats['assistant_messages']}
-⏱️ Duración: {stats['session_duration']}
-🧠 Mensajes en contexto: {stats['messages_in_context']}"""
-            
-        except Exception as e:
-            return f" Error obteniendo estadísticas: {str(e)}"
-    
-    async def clear_session(self) -> str:
-        """Limpiar contexto de sesión"""
-        try:
-            response = await self.client.post(f"{self.server_url}/sessions/{self.session_id}/clear")
-            response.raise_for_status()
-            return "🧹 Contexto de sesión limpiado"
-            
-        except Exception as e:
-            return f" Error limpiando sesión: {str(e)}"
+            return f"❌ Error: {str(e)}"
     
     async def cleanup(self):
         """Limpiar recursos del cliente"""
-        if self.client:
-            await self.client.aclose()
-        print("🧹 Cliente desconectado")
+        if self.server_process:
+            try:
+                self.server_process.terminate()
+                self.server_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.server_process.kill()
+            except Exception:
+                pass
+        
+        print("🧹 Cliente MCP desconectado")
 
 def show_banner():
-    """Mostrar banner del cliente"""
+    """Mostrar banner del cliente MCP"""
     banner = """
 ╔══════════════════════════════════════════════════════════════╗
 ║                     MCPChatbot Cliente                       ║
-║              Conectando a Servidor Local                     ║
+║              Conectando a Servidor MCP Local                 ║
 ╠══════════════════════════════════════════════════════════════╣
-║  🔗 Modo Cliente-Servidor                                    ║
-║  🤖 Claude API via Servidor                                  ║
+║  🔗 Protocolo MCP via stdio                                  ║
+║  🤖 Claude API via Servidor MCP                              ║
 ║  💄 Sistema de Belleza Remoto                                ║
-║  🌐 Citas Inspiracionales                                    ║
+║  🌟 Citas Inspiracionales                                    ║
 ║  📁 Gestión de Archivos                                      ║
 ╚══════════════════════════════════════════════════════════════╝
 """
     print(banner)
 
 async def main():
-    """Función principal del cliente"""
+    """Función principal del cliente MCP"""
     show_banner()
     
     try:
-        # Inicializar cliente
-        client = RemoteClient()
+        # Inicializar cliente MCP
+        client = MCPClient()
         
         if await client.initialize():
             await client.run_interactive_mode()
         else:
-            print("\n No se pudo conectar al servidor")
-            print("💡 Primero ejecuta: python3 server_local.py")
+            print("\n❌ No se pudo conectar al servidor MCP")
+            print("💡 Asegúrate de que server_local.py esté disponible")
             
     except KeyboardInterrupt:
         print("\n👋 Cliente interrumpido por el usuario")
     except Exception as e:
-        print(f" Error inesperado: {str(e)}")
+        print(f"❌ Error inesperado: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     asyncio.run(main())
