@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any
 class RemoteQuotesService:
     def __init__(self):
         """Inicializar servicio de citas remotas"""
-        self.server_url = "https://mcpremoteserver-production.up.railway.app"
+        self.server_url = "https://web-production-de5ff.up.railway.app"
         self.timeout = 10.0
         self.is_available = False
     
