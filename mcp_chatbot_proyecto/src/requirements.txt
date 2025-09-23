@@ -1,0 +1,34 @@
+# MCPChatbot - Sistema de Chat con Belleza y MCP
+# Dependencias principales
+
+# Claude API
+anthropic>=0.28.0
+
+# HTTP cliente para servicios remotos
+httpx>=0.26.0
+
+# Variables de entorno
+python-dotenv>=1.0.0
+
+# Dependencias del sistema incluidas en Python estándar (NO instalar):
+# - colorsys (manejo de colores)
+# - asyncio (programación asíncrona)
+# - json (manejo de JSON)
+# - os (sistema operativo)
+# - datetime (fechas y horas)
+# - typing (anotaciones de tipos)
+# - pathlib (rutas de archivos)
+# - subprocess (ejecutar comandos)
+# - tempfile (archivos temporales)
+# - logging (registro de eventos)
+
+# Dependencias opcionales para desarrollo
+pytest>=7.0.0              # Testing
+pytest-asyncio>=0.21.0     # Testing async
+black>=23.0.0               # Formateo de código
+flake8>=6.0.0              # Linting
+mypy>=1.0.0                # Type checking
+
+# Dependencias para interfaz avanzada (opcional)
+rich>=13.0.0               # Terminal mejorado
+colorama>=0.4.6            # Colores en Windows
