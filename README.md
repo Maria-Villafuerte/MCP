@@ -239,6 +239,7 @@ pytest tests/
 ## 🌐 Servidor Remoto
 
 El sistema se conecta a un servidor MCP remoto para citas inspiracionales:
+- **Link**: https://web-production-de5ff.up.railway.app
 - **Funcionalidad**: Citas, consejos de bienestar, sabiduría diaria
 - **Fallback**: Si no está disponible, usa citas locales
 
