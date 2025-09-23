@@ -56,8 +56,8 @@ src/
 
 1. **Clonar el repositorio**
 ```bash
-git clone <repository-url>
-cd mcpchatbot-beauty
+git clone https://github.com/Maria-Villafuerte/MCP.git
+cd MCP
 ```
 
 2. **Crear entorno virtual**
@@ -239,7 +239,6 @@ pytest tests/
 ## 🌐 Servidor Remoto
 
 El sistema se conecta a un servidor MCP remoto para citas inspiracionales:
-- **URL**: https://mcpremoteserver-production.up.railway.app
 - **Funcionalidad**: Citas, consejos de bienestar, sabiduría diaria
 - **Fallback**: Si no está disponible, usa citas locales
 
