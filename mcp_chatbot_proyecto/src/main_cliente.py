@@ -20,7 +20,7 @@ from views.chat_view import ChatView
 from views.beauty_view import BeautyView
 
 class MCPClient:
-    def __init__(self, server_script: str = "server_local.py"):
+    def __init__(self, server_script: str = "beauty_server_local.py"):
         """Inicializar cliente MCP"""
         self.server_script = server_script
         self.session_id = f"client_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
