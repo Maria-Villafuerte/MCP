@@ -1,32 +1,45 @@
 #!/usr/bin/env python3
 """
-Cliente MCP Simple - Conecta a múltiples servidores MCP
+Cliente MCP Multi-Servidor
+Se conecta a múltiples servidores MCP: Beauty, Movies y Sleep Coach
 """
 
 import asyncio
 import json
-import subprocess
+import os
 import sys
+import subprocess
 from pathlib import Path
+from datetime import datetime
+from typing import Any, Dict, Optional, List
 
-# Agregar src al path
+# Agregar src al path para imports de vistas (si existen)
 src_path = Path(__file__).parent / "src"
-sys.path.insert(0, str(src_path))
+if src_path.exists():
+    sys.path.insert(0, str(src_path))
+    try:
+        from views.chat_view import ChatView
+        from views.beauty_view import BeautyView
+        VIEWS_AVAILABLE = True
+    except ImportError:
+        VIEWS_AVAILABLE = False
+else:
+    VIEWS_AVAILABLE = False
 
-from views.chat_view import ChatView
-
-class SimpleConnection:
-    def __init__(self, script_name, display_name):
-        self.script = script_name
-        self.name = display_name
+class MCPServerConnection:
+    """Conexión a un servidor MCP específico"""
+    def __init__(self, name: str, script: str, display_name: str):
+        self.name = name
+        self.script = script
+        self.display_name = display_name
         self.process = None
         self.msg_id = 0
         self.active = False
     
-    async def start(self):
-        """Iniciar servidor"""
+    async def start(self) -> bool:
+        """Iniciar servidor MCP"""
         if not Path(self.script).exists():
-            print(f"No se encuentra: {self.script}")
+            print(f"❌ No se encuentra: {self.script}")
             return False
         
         try:
@@ -38,32 +51,39 @@ class SimpleConnection:
                 text=True
             )
             
-            # Inicializar MCP
+            # Inicializar protocolo MCP
             init_msg = {
                 "jsonrpc": "2.0",
-                "id": 1,
+                "id": self._next_id(),
                 "method": "initialize",
                 "params": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {"tools": {}},
-                    "clientInfo": {"name": "SimpleClient", "version": "1.0"}
+                    "clientInfo": {"name": "MultiMCPClient", "version": "1.0"}
                 }
             }
             
             response = await self.send_request(init_msg)
             if response and "result" in response:
-                # Enviar initialized
-                await self.send_notification({"jsonrpc": "2.0", "method": "notifications/initialized"})
+                # Enviar initialized notification
+                await self.send_notification({
+                    "jsonrpc": "2.0", 
+                    "method": "notifications/initialized"
+                })
                 self.active = True
                 return True
             
             return False
             
         except Exception as e:
-            print(f"Error iniciando {self.name}: {e}")
+            print(f"Error iniciando {self.display_name}: {e}")
             return False
     
-    async def send_request(self, message):
+    def _next_id(self) -> int:
+        self.msg_id += 1
+        return self.msg_id
+    
+    async def send_request(self, message: Dict) -> Optional[Dict]:
         """Enviar request y esperar respuesta"""
         try:
             if not self.process:
@@ -81,7 +101,7 @@ class SimpleConnection:
         except Exception:
             return None
     
-    async def send_notification(self, message):
+    async def send_notification(self, message: Dict) -> None:
         """Enviar notificación"""
         try:
             if self.process:
@@ -91,14 +111,13 @@ class SimpleConnection:
         except Exception:
             pass
     
-    async def call_tool(self, tool_name, args):
-        """Llamar herramienta"""
-        self.msg_id += 1
+    async def call_tool(self, tool_name: str, arguments: Dict) -> Optional[str]:
+        """Llamar herramienta MCP"""
         request = {
             "jsonrpc": "2.0",
-            "id": self.msg_id,
+            "id": self._next_id(),
             "method": "tools/call",
-            "params": {"name": tool_name, "arguments": args}
+            "params": {"name": tool_name, "arguments": arguments}
         }
         
         response = await self.send_request(request)
@@ -107,7 +126,7 @@ class SimpleConnection:
             if content and len(content) > 0:
                 return content[0]["text"]
         
-        return "Sin respuesta"
+        return "Sin respuesta del servidor"
     
     def stop(self):
         """Detener servidor"""
@@ -122,573 +141,604 @@ class SimpleConnection:
 
 class MultiMCPClient:
     def __init__(self):
-        self.connections = {
-            'local': SimpleConnection('server_local.py', 'Belleza/Citas'),
-            'sleep': SimpleConnection('sleep_coach.py', 'Sleep Coach'),
-            'movies': SimpleConnection('movie_server.py', 'Movies')
+        """Inicializar cliente multi-MCP"""
+        self.session_id = f"multi_client_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.conversation_history = []
+        
+        # Configurar servidores MCP disponibles
+        self.servers = {
+            'beauty': MCPServerConnection(
+                'beauty', 
+                'beauty_mcp_server_local.py', 
+                'Beauty Palette Server'
+            ),
+            'movies': MCPServerConnection(
+                'movies', 
+                'movie_server.py', 
+                'Movies Server'
+            ),
+            'sleep': MCPServerConnection(
+                'sleep', 
+                'sleep_coach.py', 
+                'Sleep Coach Server'
+            )
         }
-        self.chat_view = ChatView()
-        self.history = []
+        
+        # Usar vistas si están disponibles
+        if VIEWS_AVAILABLE:
+            self.chat_view = ChatView()
+            self.beauty_view = BeautyView()
+        else:
+            self.chat_view = SimpleConsoleView()
+            self.beauty_view = SimpleBeautyView()
     
-    async def start(self):
-        """Iniciar todos los servidores"""
-        print("Iniciando servidores MCP...")
+    async def start(self) -> bool:
+        """Iniciar todos los servidores MCP disponibles"""
+        print("🚀 Iniciando servidores MCP...")
         
         results = {}
-        for name, conn in self.connections.items():
-            print(f"Conectando a {conn.name}...")
-            results[name] = await conn.start()
+        for name, server in self.servers.items():
+            print(f"   Conectando a {server.display_name}...")
+            results[name] = await server.start()
             status = "✅" if results[name] else "❌"
-            print(f"  {conn.name}: {status}")
+            print(f"   {server.display_name}: {status}")
         
         connected = sum(1 for r in results.values() if r)
-        print(f"\n{connected}/{len(self.connections)} servidores conectados\n")
+        print(f"\n📊 {connected}/{len(self.servers)} servidores conectados")
         
-        return results.get('local', False)  # Al menos local debe funcionar
+        return connected > 0  # Al menos un servidor debe funcionar
     
     async def run(self):
-        """Ejecutar cliente"""
-        self.chat_view.show_welcome_message()
-        self.show_status()
+        """Ejecutar cliente interactivo"""
+        self.show_welcome()
+        self.show_server_status()
         
         while True:
             try:
-                user_input = self.chat_view.get_user_input()
+                user_input = input("\n🎯 Multi MCP > ").strip()
                 
                 if user_input.lower() == '/quit':
                     break
-                elif not user_input.strip():
+                elif not user_input:
                     continue
                 
                 response = await self.process_input(user_input)
                 if response:
-                    self.chat_view.show_response(response)
+                    print(f"\n{response}")
                 
             except KeyboardInterrupt:
                 break
             except Exception as e:
-                self.chat_view.show_error(f"Error: {e}")
+                print(f"❌ Error: {e}")
         
         await self.cleanup()
-        self.chat_view.show_goodbye()
+        print("\n👋 Cliente multi-MCP desconectado. ¡Hasta pronto!")
     
-    def show_status(self):
-        """Mostrar estado de conexiones"""
-        print("🔗 SERVIDORES CONECTADOS:")
-        for name, conn in self.connections.items():
-            status = "✅" if conn.active else "❌"
-            print(f"  {status} {conn.name}")
-        print()
-    
-    async def process_input(self, user_input):
+    async def process_input(self, user_input: str) -> Optional[str]:
         """Procesar entrada del usuario"""
-        self.history.append({"role": "user", "content": user_input})
+        self.conversation_history.append({"role": "user", "content": user_input})
         
         if user_input.startswith('/'):
             return await self.handle_command(user_input)
-        
-        # Mensaje normal - enviar a servidor local
-        if self.connections['local'].active:
-            response = await self.connections['local'].call_tool("chat", {"message": user_input})
-            self.history.append({"role": "assistant", "content": response})
-            return response
         else:
-            return "Servidor local no disponible"
+            # Mensaje normal - mostrar ayuda
+            return self.get_quick_help()
     
-    async def handle_command(self, command):
-        """Manejar comandos especiales"""
+    async def handle_command(self, command: str) -> str:
+        """Manejar comandos del sistema"""
         parts = command.strip().split()
-        if len(parts) < 2:
-            return self.get_help()
+        if len(parts) < 1:
+            return self.get_help_message()
         
         cmd = parts[0].lower()
-        action = parts[1].lower()
         
-        # Comandos locales
+        # Comandos del sistema
         if cmd == '/help':
-            return self.get_help()
+            return self.get_help_message()
         elif cmd == '/status':
-            self.show_status()
+            self.show_server_status()
             return None
         elif cmd == '/clear':
-            self.history = []
-            return "Historial limpiado"
-        elif cmd == '/context':
-            return self._show_context_summary()
+            self.conversation_history = []
+            return "🧹 Historial limpiado"
+        elif cmd == '/stats':
+            return self.get_session_stats()
         
-        # Comandos de belleza completos
+        # Comandos de Beauty Palette Server
         elif cmd == '/beauty':
             return await self.handle_beauty_command(command)
-        
         elif cmd == '/palette':
             return await self.handle_palette_command(command)
+        elif cmd == '/quote':
+            return await self.handle_quote_command(command)
+        elif cmd == '/harmony':
+            return await self.handle_harmony_command(command)
         
-        # Comandos de citas
-        elif cmd == '/quotes':
-            if not self.connections['local'].active:
-                return "Servidor de citas no disponible"
-            
-            if action == 'get':
-                category = parts[2] if len(parts) > 2 else None
-                return await self.connections['local'].call_tool("get_quote", {"category": category} if category else {})
-            else:
-                return await self.connections['local'].call_tool("git_command", {"command": command})
-        
-        # Comandos de sueño
-        elif cmd == '/sleep':
-            if not self.connections['sleep'].active:
-                return "Sleep Coach no disponible"
-            
-            if action == 'profile':
-                return await self.handle_sleep_profile()
-            elif action == 'analyze':
-                user_id = parts[2] if len(parts) > 2 else 'default'
-                return await self.connections['sleep'].call_tool("analyze_sleep_pattern", {"user_id": user_id})
-            elif action == 'recommend':
-                user_id = parts[2] if len(parts) > 2 else 'default'
-                return await self.connections['sleep'].call_tool("get_personalized_recommendations", {"user_id": user_id})
-            elif action == 'schedule':
-                user_id = parts[2] if len(parts) > 2 else 'default'
-                return await self.connections['sleep'].call_tool("create_weekly_schedule", {"user_id": user_id})
-            else:
-                query = ' '.join(parts[1:])
-                return await self.connections['sleep'].call_tool("quick_sleep_advice", {"query": query})
-        
-        # Comandos de películas
+        # Comandos de Movies Server
         elif cmd == '/movie':
-            if not self.connections['movies'].active:
-                return "Servidor de películas no disponible"
-            
-            if action == 'search':
+            return await self.handle_movie_command(command)
+        
+        # Comandos de Sleep Coach Server
+        elif cmd == '/sleep':
+            return await self.handle_sleep_command(command)
+        
+        else:
+            return f"❌ Comando desconocido: {cmd}. Usa /help para ver comandos disponibles"
+    
+    # === COMANDOS DE BEAUTY PALETTE SERVER ===
+    
+    async def handle_beauty_command(self, command: str) -> str:
+        """Manejar comandos de belleza"""
+        if not self.servers['beauty'].active:
+            return "❌ Beauty Server no disponible"
+        
+        parts = command.strip().split()
+        if len(parts) < 2:
+            return self.get_beauty_help()
+        
+        action = parts[1].lower()
+        
+        try:
+            if action == "help":
+                return self.get_beauty_help()
+            elif action == "create":
+                return await self.create_beauty_profile()
+            elif action == "list":
+                return await self.servers['beauty'].call_tool("list_beauty_profiles", {})
+            elif action == "profile":
                 if len(parts) < 3:
-                    return "Uso: /movie search <título>"
+                    return "❌ Uso: /beauty profile <user_id>"
+                return await self.servers['beauty'].call_tool("get_beauty_profile", {"user_id": parts[2]})
+            elif action == "history":
+                if len(parts) < 3:
+                    return "❌ Uso: /beauty history <user_id>"
+                return await self.servers['beauty'].call_tool("get_user_palette_history", {"user_id": parts[2]})
+            else:
+                return f"❌ Acción no válida: {action}"
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
+    
+    async def handle_palette_command(self, command: str) -> str:
+        """Generar paleta de colores"""
+        if not self.servers['beauty'].active:
+            return "❌ Beauty Server no disponible"
+        
+        parts = command.strip().split()
+        if len(parts) < 4:
+            return """❌ Uso: /palette <tipo> <user_id> <evento>
+
+TIPOS: ropa, maquillaje, accesorios
+EVENTOS: casual, trabajo, formal, fiesta, cita
+
+EJEMPLO: /palette ropa maria_123 trabajo"""
+        
+        palette_type = parts[1].lower()
+        user_id = parts[2]
+        event_type = parts[3].lower()
+        
+        if palette_type not in ["ropa", "maquillaje", "accesorios"]:
+            return "❌ Tipo no válido. Opciones: ropa, maquillaje, accesorios"
+        
+        try:
+            return await self.servers['beauty'].call_tool("generate_color_palette", {
+                "user_id": user_id,
+                "palette_type": palette_type,
+                "event_type": event_type
+            })
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
+    
+    async def handle_quote_command(self, command: str) -> str:
+        """Obtener cita inspiracional"""
+        if not self.servers['beauty'].active:
+            return "❌ Beauty Server no disponible"
+        
+        parts = command.strip().split()
+        category = parts[1] if len(parts) > 1 else None
+        
+        try:
+            return await self.servers['beauty'].call_tool("get_inspirational_quote", 
+                {"category": category} if category else {})
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
+    
+    async def handle_harmony_command(self, command: str) -> str:
+        """Analizar armonía de colores"""
+        if not self.servers['beauty'].active:
+            return "❌ Beauty Server no disponible"
+        
+        parts = command.strip().split()
+        if len(parts) < 2:
+            return """❌ Uso: /harmony <color1> [color2] [color3] ...
+
+EJEMPLO: /harmony #FF6347 #4169E1 #32CD32"""
+        
+        colors = parts[1:]
+        
+        # Validar formato hexadecimal
+        for color in colors:
+            if not color.startswith('#') or len(color) != 7:
+                return f"❌ Color inválido: {color}. Use formato #RRGGBB"
+        
+        try:
+            return await self.servers['beauty'].call_tool("analyze_color_harmony", {"colors": colors})
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
+    
+    # === COMANDOS DE MOVIES SERVER ===
+    
+    async def handle_movie_command(self, command: str) -> str:
+        """Manejar comandos de películas"""
+        if not self.servers['movies'].active:
+            return "❌ Movies Server no disponible"
+        
+        parts = command.strip().split()
+        if len(parts) < 2:
+            return self.get_movies_help()
+        
+        action = parts[1].lower()
+        
+        try:
+            if action == "help":
+                return self.get_movies_help()
+            
+            elif action == "search":
+                if len(parts) < 3:
+                    return "❌ Uso: /movie search <título>"
                 query = ' '.join(parts[2:])
-                return await self.connections['movies'].call_tool("search_movie", {"query": query, "limit": 10})
+                return await self.servers['movies'].call_tool("search_movie", {
+                    "query": query, "limit": 10
+                })
             
-            elif action == 'details':
+            elif action == "details":
                 if len(parts) < 3:
-                    return "Uso: /movie details <título>"
+                    return "❌ Uso: /movie details <título>"
                 title = ' '.join(parts[2:])
-                return await self.connections['movies'].call_tool("movie_details", {"title": title})
+                return await self.servers['movies'].call_tool("movie_details", {"title": title})
             
-            elif action == 'actor':
+            elif action == "actor":
                 if len(parts) < 3:
-                    return "Uso: /movie actor <nombre>"
+                    return "❌ Uso: /movie actor <nombre>"
                 actor = ' '.join(parts[2:])
-                return await self.connections['movies'].call_tool("top_movies_by_actor_tool", {"actor": actor, "limit": 10})
+                return await self.servers['movies'].call_tool("top_movies_by_actor_tool", {
+                    "actor": actor, "limit": 10
+                })
             
-            elif action == 'similar':
+            elif action == "similar":
                 if len(parts) < 3:
-                    return "Uso: /movie similar <título>"
+                    return "❌ Uso: /movie similar <título>"
                 title = ' '.join(parts[2:])
-                return await self.connections['movies'].call_tool("similar_movies_tool", {"title": title, "limit": 10})
+                return await self.servers['movies'].call_tool("similar_movies_tool", {
+                    "title": title, "limit": 10
+                })
             
-            elif action == 'recommend':
-                return await self.connections['movies'].call_tool("recommend_movies_tool", {
-                    "genres": None, "min_vote": 0.0, "from_year": None, "to_year": None,
-                    "language": None, "include_cast": None, "limit": 15
+            elif action == "recommend":
+                return await self.servers['movies'].call_tool("recommend_movies_tool", {
+                    "genres": None, "min_vote": 0.0, "limit": 15
+                })
+            
+            elif action == "playlist":
+                target_minutes = int(parts[2]) if len(parts) > 2 and parts[2].isdigit() else 480
+                return await self.servers['movies'].call_tool("build_playlist_tool", {
+                    "target_minutes": target_minutes, "prefer_high_rating": True
                 })
             
             else:
-                return "Comandos: search, details, actor, similar, recommend"
-        
-        else:
-            return f"Comando desconocido: {cmd}"
+                return f"❌ Acción no válida: {action}"
+                
+        except Exception as e:
+            return f"❌ Error: {str(e)}"
     
-    def _show_context_summary(self):
-        """Mostrar resumen del contexto"""
-        if not self.history:
-            return "No hay mensajes en el contexto actual"
-        
-        summary = "\n📋 RESUMEN DEL CONTEXTO ACTUAL:\n"
-        summary += "-" * 40 + "\n"
-        
-        # Mostrar últimos 5 mensajes
-        recent = self.history[-5:]
-        for i, msg in enumerate(recent, 1):
-            role_icon = "👤" if msg["role"] == "user" else "🤖"
-            content_preview = msg["content"][:60] + "..." if len(msg["content"]) > 60 else msg["content"]
-            summary += f"{i}. {role_icon} {content_preview}\n"
-        
-        total = len(self.history)
-        user_msgs = len([m for m in self.history if m["role"] == "user"])
-        assistant_msgs = len([m for m in self.history if m["role"] == "assistant"])
-        
-        summary += f"\n📊 Total: {total} | Usuario: {user_msgs} | Asistente: {assistant_msgs}"
-        return summary
+    # === COMANDOS DE SLEEP COACH SERVER ===
     
-    async def handle_beauty_command(self, command):
-        """Manejar comandos de belleza completos"""
-        if not self.connections['local'].active:
-            return "Servidor de belleza no disponible"
+    async def handle_sleep_command(self, command: str) -> str:
+        """Manejar comandos de sleep coach"""
+        if not self.servers['sleep'].active:
+            return "❌ Sleep Coach Server no disponible"
+        
+        parts = command.strip().split()
+        if len(parts) < 2:
+            return self.get_sleep_help()
+        
+        action = parts[1].lower()
         
         try:
-            parts = command.strip().split()
-            if len(parts) < 2:
-                return self.get_beauty_help()
-            
-            action = parts[1].lower()
-            
             if action == "help":
-                return self.get_beauty_help()
-            
-            elif action == "create_profile":
-                return await self.create_profile_interactive()
-            
-            elif action == "list_profiles":
-                return await self.connections['local'].call_tool("git_command", {"command": "/beauty list_profiles"})
+                return self.get_sleep_help()
             
             elif action == "profile":
-                if len(parts) < 3:
-                    return "❌ Especifica user_id. Uso: /beauty profile <user_id>"
-                full_command = " ".join(parts)
-                return await self.connections['local'].call_tool("git_command", {"command": full_command})
+                return await self.create_sleep_profile()
             
-            elif action == "history":
+            elif action == "analyze":
                 if len(parts) < 3:
-                    return "❌ Especifica user_id. Uso: /beauty history <user_id>"
-                full_command = " ".join(parts)
-                return await self.connections['local'].call_tool("git_command", {"command": full_command})
+                    return "❌ Uso: /sleep analyze <user_id>"
+                return await self.servers['sleep'].call_tool("analyze_sleep_pattern", {"user_id": parts[2]})
+            
+            elif action == "recommend":
+                if len(parts) < 3:
+                    return "❌ Uso: /sleep recommend <user_id>"
+                return await self.servers['sleep'].call_tool("get_personalized_recommendations", {"user_id": parts[2]})
+            
+            elif action == "schedule":
+                if len(parts) < 3:
+                    return "❌ Uso: /sleep schedule <user_id>"
+                return await self.servers['sleep'].call_tool("create_weekly_schedule", {"user_id": parts[2]})
+            
+            elif action == "advice":
+                if len(parts) < 3:
+                    return "❌ Uso: /sleep advice <consulta>"
+                query = ' '.join(parts[2:])
+                return await self.servers['sleep'].call_tool("quick_sleep_advice", {"query": query})
             
             else:
-                # Pasar comando completo al servidor
-                return await self.connections['local'].call_tool("git_command", {"command": command})
+                return f"❌ Acción no válida: {action}"
                 
         except Exception as e:
             return f"❌ Error: {str(e)}"
     
-    async def create_profile_interactive(self):
-        """Crear perfil de forma interactiva usando MCP"""
-        try:
-            # Recopilar datos usando la vista de belleza
-            profile_data = self.collect_profile_data()
-            
-            if not profile_data:
-                return "Creación de perfil cancelada"
-            
-            # Usar la herramienta MCP create_profile
-            response = await self.connections['local'].call_tool("create_profile", profile_data)
-            
-            if response and "creado" in response.lower():
-                return f"✅ {response}\n\n💄 Ahora puedes generar paletas con /palette"
-            else:
-                return f"❌ Error creando perfil: {response}"
-                
-        except Exception as e:
-            return f"❌ Error: {str(e)}"
+    # === FUNCIONES INTERACTIVAS ===
     
-    def collect_profile_data(self):
-        """Recopilar datos para crear perfil (simplificado pero completo)"""
+    async def create_beauty_profile(self) -> str:
+        """Crear perfil de belleza interactivo"""
         print("\n🎨 CREACIÓN DE PERFIL DE BELLEZA")
         print("=" * 50)
         
         try:
-            # Información básica
-            user_id = input("👤 ID de usuario (único): ").strip()
-            if not user_id:
-                return None
-                
+            user_id = input("👤 ID de usuario: ").strip()
+            if not user_id: return "❌ ID requerido"
+            
             name = input("📝 Nombre completo: ").strip()
-            if not name:
-                return None
+            if not name: return "❌ Nombre requerido"
             
-            # Características físicas
-            print("\n🌈 CARACTERÍSTICAS FÍSICAS:")
+            # Características físicas con menús
+            skin_tone = self.select_option("Tono de piel", ["clara", "media", "oscura"])
+            undertone = self.select_option("Subtono", ["frio", "calido", "neutro"])
+            eye_color = self.select_option("Color de ojos", ["azul", "verde", "cafe", "gris", "negro"])
+            hair_color = self.select_option("Color de cabello", ["rubio", "castano", "negro", "rojo", "gris"])
+            hair_type = self.select_option("Tipo de cabello", ["liso", "ondulado", "rizado"])
+            style_preference = self.select_option("Estilo preferido", 
+                ["moderno", "clasico", "bohemio", "minimalista", "romantico", "edgy"])
             
-            print("Tono de piel:")
-            print("  1. clara")
-            print("  2. media") 
-            print("  3. oscura")
-            skin_choice = input("Selección (1-3): ").strip()
-            skin_tones = ["clara", "media", "oscura"]
-            skin_tone = skin_tones[int(skin_choice)-1] if skin_choice.isdigit() and 1 <= int(skin_choice) <= 3 else "media"
-            
-            print("\nSubtono de piel:")
-            print("  1. frío")
-            print("  2. cálido")
-            print("  3. neutro")
-            under_choice = input("Selección (1-3): ").strip()
-            undertones = ["frio", "calido", "neutro"]
-            undertone = undertones[int(under_choice)-1] if under_choice.isdigit() and 1 <= int(under_choice) <= 3 else "neutro"
-            
-            print("\nColor de ojos:")
-            print("  1. azul")
-            print("  2. verde") 
-            print("  3. café")
-            print("  4. gris")
-            print("  5. negro")
-            eye_choice = input("Selección (1-5): ").strip()
-            eye_colors = ["azul", "verde", "cafe", "gris", "negro"]
-            eye_color = eye_colors[int(eye_choice)-1] if eye_choice.isdigit() and 1 <= int(eye_choice) <= 5 else "cafe"
-            
-            print("\nColor de cabello:")
-            print("  1. rubio")
-            print("  2. castaño")
-            print("  3. negro")
-            print("  4. rojo")
-            print("  5. gris")
-            hair_choice = input("Selección (1-5): ").strip()
-            hair_colors = ["rubio", "castano", "negro", "rojo", "gris"]
-            hair_color = hair_colors[int(hair_choice)-1] if hair_choice.isdigit() and 1 <= int(hair_choice) <= 5 else "castano"
-            
-            print("\nTipo de cabello:")
-            print("  1. liso")
-            print("  2. ondulado")
-            print("  3. rizado")
-            hair_type_choice = input("Selección (1-3): ").strip()
-            hair_types = ["liso", "ondulado", "rizado"]
-            hair_type = hair_types[int(hair_type_choice)-1] if hair_type_choice.isdigit() and 1 <= int(hair_type_choice) <= 3 else "liso"
-            
-            print("\nEstilo preferido:")
-            print("  1. clásico")
-            print("  2. moderno")
-            print("  3. bohemio")
-            print("  4. minimalista")
-            print("  5. romántico")
-            print("  6. edgy")
-            style_choice = input("Selección (1-6): ").strip()
-            styles = ["clasico", "moderno", "bohemio", "minimalista", "romantico", "edgy"]
-            style_preference = styles[int(style_choice)-1] if style_choice.isdigit() and 1 <= int(style_choice) <= 6 else "moderno"
-            
-            # Compilar datos
             profile_data = {
-                "user_id": user_id,
-                "name": name,
-                "skin_tone": skin_tone,
-                "undertone": undertone,
-                "eye_color": eye_color,
-                "hair_color": hair_color,
-                "hair_type": hair_type,
-                "style_preference": style_preference
+                "user_id": user_id, "name": name, "skin_tone": skin_tone,
+                "undertone": undertone, "eye_color": eye_color, "hair_color": hair_color,
+                "hair_type": hair_type, "style_preference": style_preference
             }
             
-            # Confirmación
-            print(f"\n✅ PERFIL CREADO:")
-            print(f"   Nombre: {name}")
-            print(f"   ID: {user_id}")
-            print(f"   Tono de piel: {skin_tone} ({undertone})")
-            print(f"   Ojos: {eye_color}")
-            print(f"   Cabello: {hair_color} ({hair_type})")
-            print(f"   Estilo: {style_preference}")
+            return await self.servers['beauty'].call_tool("create_beauty_profile", profile_data)
             
-            confirm = input("\n¿Guardar este perfil? (s/n): ").strip().lower()
-            if confirm in ['s', 'si', 'yes', 'y']:
-                return profile_data
-            else:
-                print("Perfil cancelado")
-                return None
-                
         except (KeyboardInterrupt, ValueError):
-            print("\nCreación de perfil cancelada")
-            return None
-        except Exception as e:
-            print(f"\nError: {e}")
-            return None
+            return "❌ Creación cancelada"
     
-    async def handle_palette_command(self, command):
-        """Manejar generación de paletas completa"""
-        if not self.connections['local'].active:
-            return "Servidor de belleza no disponible"
+    async def create_sleep_profile(self) -> str:
+        """Crear perfil de sueño interactivo"""
+        print("\n😴 CREACIÓN DE PERFIL DE SUEÑO")
+        print("=" * 50)
         
         try:
-            parts = command.strip().split()
+            user_id = input("👤 ID de usuario: ").strip()
+            if not user_id: return "❌ ID requerido"
             
-            if len(parts) < 4:
-                return "❌ Uso: /palette <tipo> <user_id> <evento>\nTipos: ropa, maquillaje, accesorios"
+            name = input("📝 Nombre: ").strip()
+            if not name: return "❌ Nombre requerido"
             
-            palette_type = parts[1].lower()
-            user_id = parts[2]
-            event_type = parts[3] if len(parts) > 3 else "casual"
+            age = int(input("🎂 Edad: ").strip())
             
-            if palette_type not in ["ropa", "maquillaje", "accesorios"]:
-                return "❌ Tipo no válido. Opciones: ropa, maquillaje, accesorios"
+            chronotype = self.select_option("Cronotipo", ["morning_lark", "night_owl", "intermediate"])
             
-            # Recopilar preferencias adicionales
-            print(f"🎨 Generando paleta {palette_type} para {event_type}...")
-            preferences = self.collect_palette_preferences(palette_type, event_type)
+            current_bedtime = input("🌙 Hora actual de dormir (HH:MM): ").strip()
+            current_wake_time = input("🌅 Hora actual de despertar (HH:MM): ").strip()
+            sleep_duration_hours = float(input("⏰ Horas de sueño promedio: ").strip())
             
-            # Construir comando completo
-            full_command = f"/palette {palette_type} {user_id} {event_type}"
+            print("\nObjetivos (selecciona números separados por comas):")
+            goals_options = ["better_quality", "more_energy", "weight_loss", "stress_reduction", "athletic_performance", "cognitive_performance"]
+            for i, goal in enumerate(goals_options, 1):
+                print(f"  {i}. {goal.replace('_', ' ').title()}")
             
-            # Usar git_command para ejecutar el comando de paleta
-            response = await self.connections['local'].call_tool("git_command", {"command": full_command})
+            goals_input = input("Selecciones: ").strip()
+            goals = [goals_options[int(i)-1] for i in goals_input.split(',') if i.isdigit() and 1 <= int(i) <= len(goals_options)]
             
-            return response or "❌ No se pudo generar la paleta"
-                
-        except Exception as e:
-            return f"❌ Error: {str(e)}"
+            work_schedule = input("📅 Horario de trabajo (ej: 9-17): ").strip()
+            
+            profile_data = {
+                "user_id": user_id, "name": name, "age": age, "chronotype": chronotype,
+                "current_bedtime": current_bedtime, "current_wake_time": current_wake_time,
+                "sleep_duration_hours": sleep_duration_hours, "goals": goals, "work_schedule": work_schedule
+            }
+            
+            return await self.servers['sleep'].call_tool("create_user_profile", profile_data)
+            
+        except (KeyboardInterrupt, ValueError) as e:
+            return f"❌ Error en creación: {str(e)}"
     
-    def collect_palette_preferences(self, palette_type, event_type):
-        """Recopilar preferencias para paleta"""
-        print(f"\n🎨 PREFERENCIAS PARA PALETA DE {palette_type.upper()}")
-        print(f"   Evento: {event_type.title()}")
+    def select_option(self, prompt: str, options: List[str]) -> str:
+        """Seleccionar opción de una lista"""
+        print(f"\n{prompt}:")
+        for i, option in enumerate(options, 1):
+            print(f"  {i}. {option}")
         
-        preferences = {
-            "palette_type": palette_type,
-            "event_type": event_type
-        }
-        
-        try:
-            # Preferencias según tipo
-            if palette_type == "ropa":
-                print("\nEstación del año:")
-                print("  1. primavera")
-                print("  2. verano") 
-                print("  3. otoño")
-                print("  4. invierno")
-                season_choice = input("Selección (1-4, Enter para omitir): ").strip()
-                seasons = ["primavera", "verano", "otono", "invierno"]
-                if season_choice.isdigit() and 1 <= int(season_choice) <= 4:
-                    preferences["season"] = seasons[int(season_choice)-1]
-                
-                print("\nIntensidad de colores:")
-                print("  1. suave")
-                print("  2. medio")
-                print("  3. vibrante") 
-                intensity_choice = input("Selección (1-3, Enter para omitir): ").strip()
-                intensities = ["suave", "medio", "vibrante"]
-                if intensity_choice.isdigit() and 1 <= int(intensity_choice) <= 3:
-                    preferences["color_intensity"] = intensities[int(intensity_choice)-1]
-            
-            elif palette_type == "maquillaje":
-                print("\nIntensidad del look:")
-                print("  1. natural")
-                print("  2. medio")
-                print("  3. dramático")
-                look_choice = input("Selección (1-3, Enter para omitir): ").strip()
-                looks = ["natural", "medio", "dramatico"]
-                if look_choice.isdigit() and 1 <= int(look_choice) <= 3:
-                    preferences["look_intensity"] = looks[int(look_choice)-1]
-                
-                print("\nÁrea de enfoque:")
-                print("  1. ojos")
-                print("  2. labios")
-                print("  3. equilibrado")
-                focus_choice = input("Selección (1-3, Enter para omitir): ").strip()
-                focuses = ["ojos", "labios", "equilibrado"]
-                if focus_choice.isdigit() and 1 <= int(focus_choice) <= 3:
-                    preferences["focus_area"] = focuses[int(focus_choice)-1]
-            
-            elif palette_type == "accesorios":
-                print("\nPreferencia de metales:")
-                print("  1. oro")
-                print("  2. plata")
-                print("  3. oro rosa")
-                print("  4. mixto")
-                metal_choice = input("Selección (1-4, Enter para omitir): ").strip()
-                metals = ["oro", "plata", "oro_rosa", "mixto"]
-                if metal_choice.isdigit() and 1 <= int(metal_choice) <= 4:
-                    preferences["metal_preference"] = metals[int(metal_choice)-1]
-        
-        except (KeyboardInterrupt, ValueError):
-            print("Usando preferencias por defecto...")
-        
-        return preferences
+        while True:
+            try:
+                choice = input("Selección: ").strip()
+                if choice.isdigit() and 1 <= int(choice) <= len(options):
+                    return options[int(choice)-1]
+                else:
+                    print("Selección inválida")
+            except (ValueError, KeyboardInterrupt):
+                return options[0]  # Valor por defecto
     
-    async def handle_sleep_profile(self):
-        """Crear perfil de sueño simplificado"""
-        profile_data = {
-            "user_id": f"user_{len(self.history)}",
-            "name": "Usuario Demo",
-            "age": 30,
-            "chronotype": "intermediate",
-            "current_bedtime": "23:00",
-            "current_wake_time": "07:00",
-            "sleep_duration_hours": 8.0,
-            "goals": ["better_quality", "more_energy"],
-            "work_schedule": "9-17"
-        }
-        
-        return await self.connections['sleep'].call_tool("create_user_profile", profile_data)
+    # === FUNCIONES DE AYUDA ===
     
-    def get_help(self):
-        """Mostrar ayuda"""
-        return """CLIENTE MCP MULTI-SERVIDOR
+    def get_help_message(self) -> str:
+        """Mensaje de ayuda completo"""
+        return """🎯 MULTI MCP CLIENT - AYUDA COMPLETA
 
-COMANDOS DISPONIBLES:
+🎨 BEAUTY PALETTE SERVER:
+  /beauty create               - Crear perfil de belleza
+  /beauty list                 - Listar perfiles
+  /beauty profile <user_id>    - Ver perfil específico
+  /beauty history <user_id>    - Historial de paletas
+  
+  /palette <tipo> <user_id> <evento>  - Generar paleta
+    Tipos: ropa, maquillaje, accesorios
+    Eventos: casual, trabajo, formal, fiesta, cita
+  
+  /quote [categoria]           - Cita inspiracional
+  /harmony <color1> <color2>   - Análisis de armonía
 
-🎨 BELLEZA:
-  /beauty help                 - Ayuda de belleza
-  /palette ropa <user> <evento> - Generar paleta
+🎬 MOVIES SERVER:
+  /movie search <título>       - Buscar películas
+  /movie details <título>      - Detalles de película
+  /movie actor <nombre>        - Películas por actor
+  /movie similar <título>      - Películas similares
+  /movie recommend             - Recomendaciones
+  /movie playlist [minutos]    - Crear playlist
 
-💫 CITAS:
-  /quotes get [categoría]      - Obtener cita
-  /quotes search <término>     - Buscar citas
-
-😴 SUEÑO:
-  /sleep profile              - Crear perfil
-  /sleep analyze <user>       - Analizar patrón
-  /sleep recommend <user>     - Recomendaciones
-  /sleep <consulta>           - Consejo rápido
-
-🎬 PELÍCULAS:
-  /movie search <título>      - Buscar películas
-  /movie details <título>     - Detalles de película
-  /movie actor <nombre>       - Películas de actor
-  /movie similar <título>     - Películas similares
-  /movie recommend            - Recomendar películas
+😴 SLEEP COACH SERVER:
+  /sleep profile               - Crear perfil de sueño
+  /sleep analyze <user_id>     - Analizar patrón
+  /sleep recommend <user_id>   - Recomendaciones
+  /sleep schedule <user_id>    - Horario semanal
+  /sleep advice <consulta>     - Consejo rápido
 
 ⚙️ SISTEMA:
-  /help                       - Esta ayuda
-  /status                     - Estado servidores
-  /clear                      - Limpiar historial
-  /quit                       - Salir
+  /help                        - Esta ayuda
+  /status                      - Estado de servidores
+  /stats                       - Estadísticas de sesión
+  /clear                       - Limpiar historial
+  /quit                        - Salir
 
-💬 Los mensajes normales van a Claude API"""
+FLUJO RECOMENDADO:
+1. Crear perfiles: /beauty create, /sleep profile
+2. Usar servicios: /palette, /movie search, /sleep analyze
+3. Obtener recomendaciones y análisis personalizados"""
     
-    def get_beauty_help(self):
-        """Ayuda específica de belleza"""
-        return """SISTEMA DE BELLEZA
+    def get_beauty_help(self) -> str:
+        return """🎨 BEAUTY PALETTE SERVER
 
-COMANDOS:
-  /beauty create_profile       - Crear perfil
-  /beauty list_profiles        - Listar perfiles
-  /beauty profile <user_id>    - Ver perfil
-  /palette ropa <user> <evento>     - Paleta de ropa
-  /palette maquillaje <user> <evento> - Paleta maquillaje
+GESTIÓN:
+  /beauty create    - Crear perfil completo
+  /beauty list      - Ver todos los perfiles
+  /beauty profile <id> - Detalles de perfil
+  /beauty history <id> - Historial de paletas
 
-EVENTOS: casual, formal, fiesta, trabajo, cita
+PALETAS:
+  /palette ropa <user_id> <evento>
+  /palette maquillaje <user_id> <evento>
+  /palette accesorios <user_id> <evento>
 
-EJEMPLO:
-  /beauty create_profile
-  /palette ropa maria_123 trabajo"""
+OTROS:
+  /quote [categoria] - Cita inspiracional
+  /harmony #color1 #color2 - Análisis de colores"""
+    
+    def get_movies_help(self) -> str:
+        return """🎬 MOVIES SERVER
+
+BÚSQUEDA:
+  /movie search <título>    - Buscar películas
+  /movie details <título>   - Información detallada
+  /movie actor <nombre>     - Películas por actor
+  /movie similar <título>   - Películas similares
+
+RECOMENDACIONES:
+  /movie recommend          - Recomendaciones generales
+  /movie playlist [minutos] - Crear playlist (default: 480 min)
+
+EJEMPLO: /movie search "The Matrix" """
+    
+    def get_sleep_help(self) -> str:
+        return """😴 SLEEP COACH SERVER
+
+PERFIL:
+  /sleep profile           - Crear perfil de sueño
+
+ANÁLISIS:
+  /sleep analyze <user_id>   - Analizar patrón actual
+  /sleep recommend <user_id> - Recomendaciones personalizadas
+  /sleep schedule <user_id>  - Horario semanal optimizado
+
+CONSEJOS:
+  /sleep advice <consulta>   - Consejo rápido
+  
+EJEMPLO: /sleep advice "no puedo dormir" """
+    
+    def get_quick_help(self) -> str:
+        return """🎯 Multi MCP Client - Usa /help para ayuda completa
+
+🎨 Beauty: /beauty create, /palette ropa user_id trabajo
+🎬 Movies: /movie search título, /movie recommend  
+😴 Sleep: /sleep profile, /sleep advice consulta
+⚙️ Sistema: /status, /help, /quit"""
+    
+    def show_welcome(self):
+        """Mostrar mensaje de bienvenida"""
+        banner = """
+╔══════════════════════════════════════════════════════════════╗
+║                    Multi MCP Client                          ║
+║        🎨 Beauty • 🎬 Movies • 😴 Sleep Coach 🎨              ║
+╠══════════════════════════════════════════════════════════════╣
+║  ✨ Perfiles y Paletas de Belleza Personalizadas             ║
+║  🎬 Base de Datos de Películas y Recomendaciones             ║
+║  😴 Coach Personal de Sueño y Rutinas                        ║
+║  🎯 Integración Multi-Servidor MCP                           ║
+╚══════════════════════════════════════════════════════════════╝
+
+🚀 Cliente Multi-MCP iniciado
+📋 Usa /help para ver todos los comandos disponibles
+"""
+        print(banner)
+    
+    def show_server_status(self):
+        """Mostrar estado de los servidores"""
+        print("🔗 ESTADO DE SERVIDORES MCP:")
+        for name, server in self.servers.items():
+            status = "✅ Conectado" if server.active else "❌ Desconectado"
+            print(f"   {server.display_name}: {status}")
+        print()
+    
+    def get_session_stats(self) -> str:
+        """Obtener estadísticas de sesión"""
+        total_messages = len(self.conversation_history)
+        connected_servers = sum(1 for s in self.servers.values() if s.active)
+        
+        return f"""📊 ESTADÍSTICAS DE SESIÓN:
+💬 Total mensajes: {total_messages}
+🔗 Servidores conectados: {connected_servers}/{len(self.servers)}
+🆔 ID de sesión: {self.session_id}
+⚙️ Servidores activos: {', '.join(s.display_name for s in self.servers.values() if s.active)}"""
     
     async def cleanup(self):
-        """Limpiar conexiones"""
-        for conn in self.connections.values():
-            conn.stop()
-        print("Servidores desconectados")
+        """Limpiar recursos"""
+        for server in self.servers.values():
+            server.stop()
+        print("🧹 Todos los servidores desconectados")
 
-def show_banner():
-    """Banner de inicio"""
-    print("""
-╔══════════════════════════════════════════════════════════════╗
-║                 MCPChatbot Multi-Servidor                    ║
-║              Conectando a Múltiples Servidores              ║
-╠══════════════════════════════════════════════════════════════╣
-║  🎨 Sistema de Belleza                                       ║
-║  😴 Sleep Coach                                              ║
-║  🎬 Base de Películas                                        ║
-║  💫 Citas Inspiracionales                                    ║
-╚══════════════════════════════════════════════════════════════╝
-""")
+# Clases simples para cuando las vistas no están disponibles
+class SimpleConsoleView:
+    def show_welcome_message(self): pass
+    def get_user_input(self): return input("> ").strip()
+    def show_response(self, response): print(f"\n{response}")
+    def show_error(self, error): print(f"\n❌ {error}")
+
+class SimpleBeautyView:
+    def show_beauty_help(self): return "🎨 Beauty System"
+    def collect_profile_data(self): return None
 
 async def main():
-    """Función principal"""
-    show_banner()
-    
+    """Función principal del cliente multi-MCP"""
     try:
         client = MultiMCPClient()
         
         if await client.start():
             await client.run()
         else:
-            print("No se pudo conectar al servidor principal")
+            print("❌ No se pudieron conectar servidores MCP")
+            print("💡 Asegúrate de que los archivos de servidor estén disponibles")
             
     except KeyboardInterrupt:
-        print("\nCliente interrumpido")
+        print("\n👋 Cliente interrumpido por el usuario")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error inesperado: {str(e)}")
 
 if __name__ == "__main__":
     asyncio.run(main())
