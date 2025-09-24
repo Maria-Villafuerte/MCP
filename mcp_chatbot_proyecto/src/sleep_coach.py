@@ -703,7 +703,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             for tip in advice_list[:4]:  # Máximo 4 consejos
                 result += f"{tip}\n"
             
-            result += f"\n📋 **Tu consulta:** {arguments['query']}\n"
+            result += f"\n **Tu consulta:** {arguments['query']}\n"
             if user_context:
                 result += f"**Contexto:** {user_context}\n"
             

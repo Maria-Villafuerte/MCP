@@ -16,7 +16,7 @@ def main():
         print("❌ No se encuentra beauty_mcp_server_local.py")
         return
     
-    print("🚀 Iniciando Beauty Palette MCP Server Local...")
+    print(" Iniciando Beauty Palette MCP Server Local...")
     
     try:
         subprocess.run([sys.executable, str(server_script)], check=True)

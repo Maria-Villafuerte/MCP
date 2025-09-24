@@ -27,12 +27,12 @@ class ChatView:
 ║                   {self.colors['bold']}MCPChatbot - Sistema de Belleza{self.colors['end']}{self.colors['cyan']}           ║
 ║              {self.colors['bold']}Chat Inteligente con Claude API{self.colors['end']}{self.colors['cyan']}                ║
 ╠══════════════════════════════════════════════════════════════╣
-║  {self.colors['green']}🤖 Claude API Integration{self.colors['cyan']}                                   ║
+║  {self.colors['green']} Claude API Integration{self.colors['cyan']}                                   ║
 ║  {self.colors['green']} Sistema de Paletas de Colores Avanzado{self.colors['cyan']}                  ║
 ║  {self.colors['green']} Recomendaciones de Belleza Personalizadas{self.colors['cyan']}               ║
 ║  {self.colors['green']} Gestión de Perfiles y Historial{self.colors['cyan']}                         ║
-║  {self.colors['green']}🌐 Servidor de Citas Remotas{self.colors['cyan']}                               ║
-║  {self.colors['green']}📁 Gestión de Archivos y Git{self.colors['cyan']}                               ║
+║  {self.colors['green']} Servidor de Citas Remotas{self.colors['cyan']}                               ║
+║  {self.colors['green']} Gestión de Archivos y Git{self.colors['cyan']}                               ║
 ╚══════════════════════════════════════════════════════════════╝{self.colors['end']}
 
 {self.colors['yellow']}💬 Puedes hacer preguntas normales o usar comandos especiales:{self.colors['end']}
@@ -68,7 +68,7 @@ class ChatView:
     
     def show_response(self, response: str) -> None:
         """Mostrar respuesta del sistema"""
-        print(f"\n{self.colors['bold']}{self.colors['green']}🤖 Claude:{self.colors['end']} {response}")
+        print(f"\n{self.colors['bold']}{self.colors['green']} Claude:{self.colors['end']} {response}")
     
     def show_error(self, error_message: str) -> None:
         """Mostrar mensaje de error"""
@@ -80,11 +80,11 @@ class ChatView:
     
     def show_warning(self, warning_message: str) -> None:
         """Mostrar mensaje de advertencia"""
-        print(f"\n{self.colors['yellow']}⚠️  Advertencia:{self.colors['end']} {warning_message}")
+        print(f"\n{self.colors['yellow']}  Advertencia:{self.colors['end']} {warning_message}")
     
     def show_info(self, info_message: str) -> None:
         """Mostrar mensaje informativo"""
-        print(f"\n{self.colors['blue']}ℹ️  Info:{self.colors['end']} {info_message}")
+        print(f"\n{self.colors['blue']}  Info:{self.colors['end']} {info_message}")
     
     def show_thinking(self) -> None:
         """Mostrar indicador de procesamiento"""
@@ -98,9 +98,9 @@ class ChatView:
 ║                                                              ║
 ║    {self.colors['green']}Gracias por usar MCPChatbot - Sistema de Belleza{self.colors['cyan']}         ║
 ║                                                              ║
-║    {self.colors['yellow']}💾 Tu sesión ha sido guardada automáticamente{self.colors['cyan']}           ║
+║    {self.colors['yellow']} Tu sesión ha sido guardada automáticamente{self.colors['cyan']}           ║
 ║    {self.colors['yellow']} Tus perfiles de belleza están seguros{self.colors['cyan']}                ║
-║    {self.colors['yellow']}📊 Los logs están disponibles para revisión{self.colors['cyan']}             ║
+║    {self.colors['yellow']} Los logs están disponibles para revisión{self.colors['cyan']}             ║
 ║                                                              ║
 ║              {self.colors['bold']}¡Vuelve pronto para más belleza!{self.colors['end']}{self.colors['cyan']}              ║
 ╚══════════════════════════════════════════════════════════════╝{self.colors['end']}
@@ -121,14 +121,14 @@ class ChatView:
 {self.colors['blue']}  /palette maquillaje{self.colors['end']}             - Generar paleta de maquillaje
 {self.colors['blue']}  /palette accesorios{self.colors['end']}             - Generar paleta de accesorios
 
-{self.colors['cyan']}🌐 CITAS INSPIRACIONALES:{self.colors['end']}
+{self.colors['cyan']} CITAS INSPIRACIONALES:{self.colors['end']}
 {self.colors['blue']}  /quotes help{self.colors['end']}                    - Ayuda de citas
 {self.colors['blue']}  /quotes get{self.colors['end']}                     - Obtener cita inspiracional
 {self.colors['blue']}  /quotes tip{self.colors['end']}                     - Consejo de belleza
 {self.colors['blue']}  /quotes search <palabra>{self.colors['end']}        - Buscar citas
 {self.colors['blue']}  /quotes wisdom{self.colors['end']}                  - Sabiduría diaria
 
-{self.colors['cyan']}📁 GESTIÓN DE ARCHIVOS Y GIT:{self.colors['end']}
+{self.colors['cyan']} GESTIÓN DE ARCHIVOS Y GIT:{self.colors['end']}
 {self.colors['blue']}  /git help{self.colors['end']}                       - Ayuda de git
 {self.colors['blue']}  /fs read <archivo>{self.colors['end']}              - Leer archivo
 {self.colors['blue']}  /fs write <archivo> <contenido>{self.colors['end']} - Escribir archivo

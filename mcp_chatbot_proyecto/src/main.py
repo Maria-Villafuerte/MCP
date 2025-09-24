@@ -31,7 +31,7 @@ def check_environment():
             f.write("# Opcional: configurar modelo de Claude\n")
             f.write("CLAUDE_MODEL=claude-3-haiku-20240307\n")
         
-        print("⚠️  Por favor, edita el archivo .env con tu API key de Anthropic")
+        print("  Por favor, edita el archivo .env con tu API key de Anthropic")
         return False
     
     return True
@@ -43,12 +43,11 @@ def show_banner():
 ║                        MCPChatbot v2.0                      ║
 ║              Chat Inteligente con Sistema de Belleza        ║
 ╠══════════════════════════════════════════════════════════════╣
-║  🤖 Claude API Integration                                   ║
+║   Claude API Integration                                   ║
 ║   Sistema de Paletas de Colores Avanzado                  ║
 ║   Recomendaciones de Belleza Personalizadas               ║
 ║   Gestión de Perfiles y Historial                         ║
-║  🌐 Servidor de Citas Remotas                               ║
-║  📁 Gestión de Archivos y Git                               ║
+║   Gestión de Archivos y Git                               ║
 ╚══════════════════════════════════════════════════════════════╝
 """
     print(banner)
@@ -63,7 +62,7 @@ async def main():
     
     try:
         # Inicializar controlador principal
-        print("🚀 Inicializando sistema...")
+        print(" Inicializando sistema...")
         controller = MainController()
         
         if await controller.initialize():
@@ -73,7 +72,7 @@ async def main():
             print(" Error en la inicialización")
             
     except KeyboardInterrupt:
-        print("\n👋 Chatbot interrumpido por el usuario")
+        print("\n Chatbot interrumpido por el usuario")
     except Exception as e:
         print(f" Error inesperado: {str(e)}")
         import traceback

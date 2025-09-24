@@ -166,7 +166,7 @@ class MainController:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"session_{timestamp}.json"
             self.session_model.save_session(filename)
-            return f"💾 Sesión guardada: {filename}"
+            return f" Sesión guardada: {filename}"
         
         # Comandos de belleza
         elif command_lower.startswith('/beauty') or command_lower.startswith('/palette'):
@@ -188,10 +188,10 @@ class MainController:
         session_stats = self.session_model.get_session_stats()
         mcp_stats = self.logging_model.get_mcp_stats()
         
-        stats_text = f"""📊 ESTADÍSTICAS DE SESIÓN:
+        stats_text = f""" ESTADÍSTICAS DE SESIÓN:
   💬 Total mensajes: {session_stats['total_messages']}
    Mensajes usuario: {session_stats['user_messages']}
-  🤖 Mensajes asistente: {session_stats['assistant_messages']}
+   Mensajes asistente: {session_stats['assistant_messages']}
   ⏱️  Duración: {session_stats['session_duration']}
   🧠 Mensajes en contexto: {session_stats['messages_in_context']}
 
@@ -216,7 +216,7 @@ class MainController:
             if self.git_controller:
                 await self.git_controller.cleanup()
             
-            print("🧹 Recursos limpiados correctamente")
+            print(" Recursos limpiados correctamente")
             
         except Exception as e:
-            print(f"⚠️  Error limpiando recursos: {str(e)}")
+            print(f"  Error limpiando recursos: {str(e)}")

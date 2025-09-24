@@ -45,7 +45,7 @@ async def initialize_system():
         claude_service = ClaudeService()
         claude_available = await claude_service.initialize()
         if not claude_available:
-            print("⚠️ Claude service no disponible - funcionalidad limitada")
+            print(" Claude service no disponible - funcionalidad limitada")
 
         beauty_controller = BeautyController(claude_service, logging_model)
         quotes_controller = QuotesController(logging_model)
@@ -316,12 +316,12 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             
             profiles = beauty_controller.beauty_model.list_profiles()
             if not profiles:
-                return [types.TextContent(type="text", text="ℹ️ No hay perfiles de belleza creados")]
+                return [types.TextContent(type="text", text=" No hay perfiles de belleza creados")]
             
             result = "👥 PERFILES DE BELLEZA DISPONIBLES:\n\n"
             for i, profile_id in enumerate(profiles, 1):
                 result += f"{i}. {profile_id}\n"
-            result += f"\n📊 Total: {len(profiles)} perfiles"
+            result += f"\n Total: {len(profiles)} perfiles"
             return [types.TextContent(type="text", text=result)]
 
         elif name == "get_beauty_profile":
@@ -334,11 +334,11 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
                 return [types.TextContent(type="text", text=f"❌ Perfil '{user_id}' no encontrado")]
             
             result = f"👤 PERFIL DE BELLEZA: {profile.name.upper()}\n\n"
-            result += f"🆔 ID: {profile.user_id}\n"
-            result += f"🎨 Tono de piel: {profile.skin_tone.title()} ({profile.undertone.title()})\n"
+            result += f" ID: {profile.user_id}\n"
+            result += f" Tono de piel: {profile.skin_tone.title()} ({profile.undertone.title()})\n"
             result += f"👁️ Color de ojos: {profile.eye_color.title()}\n"
             result += f"💇‍♀️ Cabello: {profile.hair_color.title()} ({profile.hair_type.title()})\n"
-            result += f"✨ Estilo: {profile.style_preference.title()}\n"
+            result += f" Estilo: {profile.style_preference.title()}\n"
             result += f"📅 Creado: {profile.created_at[:19].replace('T', ' ')}\n"
             
             return [types.TextContent(type="text", text=result)]
@@ -354,7 +354,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             
             palettes = beauty_controller.beauty_model.load_user_palettes(user_id)
             if not palettes:
-                return [types.TextContent(type="text", text=f"ℹ️ No hay historial de paletas para {user_id}")]
+                return [types.TextContent(type="text", text=f" No hay historial de paletas para {user_id}")]
             
             result = f"📈 HISTORIAL DE PALETAS - {profile.name.upper()}\n\n"
             for i, palette in enumerate(palettes[:10], 1):  # Últimas 10
@@ -363,7 +363,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             
             if len(palettes) > 10:
                 result += f"\n... y {len(palettes) - 10} paletas más"
-            result += f"\n📊 Total: {len(palettes)} paletas generadas"
+            result += f"\n Total: {len(palettes)} paletas generadas"
             
             return [types.TextContent(type="text", text=result)]
 
@@ -478,15 +478,15 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
                 try:
                     beauty_stats = logging_model.get_beauty_stats()
                     mcp_stats = logging_model.get_mcp_stats()
-                    stats.append(f"🎨 Interacciones de belleza: {beauty_stats.get('total_interactions', 0)}")
+                    stats.append(f" Interacciones de belleza: {beauty_stats.get('total_interactions', 0)}")
                     stats.append(f"🔧 Interacciones MCP: {mcp_stats.get('total_interactions', 0)}")
                 except:
-                    stats.append("📊 Estadísticas no disponibles")
+                    stats.append(" Estadísticas no disponibles")
             
             claude_status = "✅ Conectado" if (claude_service and claude_service.is_initialized) else "❌ Desconectado"
-            stats.append(f"🤖 Claude API: {claude_status}")
+            stats.append(f" Claude API: {claude_status}")
             
-            result = "📊 ESTADÍSTICAS DEL SERVIDOR:\n\n" + "\n".join(stats)
+            result = " ESTADÍSTICAS DEL SERVIDOR:\n\n" + "\n".join(stats)
             return [types.TextContent(type="text", text=result)]
 
         else:
@@ -515,10 +515,10 @@ async def main():
         )
 
 if __name__ == "__main__":
-    print("🚀 Iniciando Servidor Local MCP Expandido...")
-    print("🎨 Sistema de Belleza Completo")
+    print(" Iniciando Servidor Local MCP Expandido...")
+    print(" Sistema de Belleza Completo")
     print("💬 Citas Inspiracionales Avanzadas") 
-    print("📁 Gestión Completa de Archivos y Git")
-    print("🤖 Claude API Integration")
-    print("📊 Sistema de Monitoreo y Estadísticas")
+    print(" Gestión Completa de Archivos y Git")
+    print(" Claude API Integration")
+    print(" Sistema de Monitoreo y Estadísticas")
     asyncio.run(main())

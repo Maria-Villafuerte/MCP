@@ -174,7 +174,7 @@ class MultiMCPClient:
     
     async def start(self) -> bool:
         """Iniciar todos los servidores MCP disponibles"""
-        print("🚀 Iniciando servidores MCP...")
+        print(" Iniciando servidores MCP...")
         
         results = {}
         for name, server in self.servers.items():
@@ -184,7 +184,7 @@ class MultiMCPClient:
             print(f"   {server.display_name}: {status}")
         
         connected = sum(1 for r in results.values() if r)
-        print(f"\n📊 {connected}/{len(self.servers)} servidores conectados")
+        print(f"\n {connected}/{len(self.servers)} servidores conectados")
         
         return connected > 0  # Al menos un servidor debe funcionar
     
@@ -195,7 +195,7 @@ class MultiMCPClient:
         
         while True:
             try:
-                user_input = input("\n🎯 Multi MCP > ").strip()
+                user_input = input("\n Multi MCP > ").strip()
                 
                 if user_input.lower() == '/quit':
                     break
@@ -212,7 +212,7 @@ class MultiMCPClient:
                 print(f"❌ Error: {e}")
         
         await self.cleanup()
-        print("\n👋 Cliente multi-MCP desconectado. ¡Hasta pronto!")
+        print("\n Cliente multi-MCP desconectado. ¡Hasta pronto!")
     
     async def process_input(self, user_input: str) -> Optional[str]:
         """Procesar entrada del usuario"""
@@ -240,7 +240,7 @@ class MultiMCPClient:
             return None
         elif cmd == '/clear':
             self.conversation_history = []
-            return "🧹 Historial limpiado"
+            return " Historial limpiado"
         elif cmd == '/stats':
             return self.get_session_stats()
         
@@ -480,7 +480,7 @@ EJEMPLO: /harmony #FF6347 #4169E1 #32CD32"""
     
     async def create_beauty_profile(self) -> str:
         """Crear perfil de belleza interactivo"""
-        print("\n🎨 CREACIÓN DE PERFIL DE BELLEZA")
+        print("\n CREACIÓN DE PERFIL DE BELLEZA")
         print("=" * 50)
         
         try:
@@ -571,9 +571,9 @@ EJEMPLO: /harmony #FF6347 #4169E1 #32CD32"""
     
     def get_help_message(self) -> str:
         """Mensaje de ayuda completo"""
-        return """🎯 MULTI MCP CLIENT - AYUDA COMPLETA
+        return """ MULTI MCP CLIENT - AYUDA COMPLETA
 
-🎨 BEAUTY PALETTE SERVER:
+ BEAUTY PALETTE SERVER:
   /beauty create               - Crear perfil de belleza
   /beauty list                 - Listar perfiles
   /beauty profile <user_id>    - Ver perfil específico
@@ -614,7 +614,7 @@ FLUJO RECOMENDADO:
 3. Obtener recomendaciones y análisis personalizados"""
     
     def get_beauty_help(self) -> str:
-        return """🎨 BEAUTY PALETTE SERVER
+        return """ BEAUTY PALETTE SERVER
 
 GESTIÓN:
   /beauty create    - Crear perfil completo
@@ -663,9 +663,9 @@ CONSEJOS:
 EJEMPLO: /sleep advice "no puedo dormir" """
     
     def get_quick_help(self) -> str:
-        return """🎯 Multi MCP Client - Usa /help para ayuda completa
+        return """ Multi MCP Client - Usa /help para ayuda completa
 
-🎨 Beauty: /beauty create, /palette ropa user_id trabajo
+ Beauty: /beauty create, /palette ropa user_id trabajo
 🎬 Movies: /movie search título, /movie recommend  
 😴 Sleep: /sleep profile, /sleep advice consulta
 ⚙️ Sistema: /status, /help, /quit"""
@@ -675,16 +675,16 @@ EJEMPLO: /sleep advice "no puedo dormir" """
         banner = """
 ╔══════════════════════════════════════════════════════════════╗
 ║                    Multi MCP Client                          ║
-║        🎨 Beauty • 🎬 Movies • 😴 Sleep Coach 🎨              ║
+║         Beauty • 🎬 Movies • 😴 Sleep Coach               ║
 ╠══════════════════════════════════════════════════════════════╣
-║  ✨ Perfiles y Paletas de Belleza Personalizadas             ║
+║   Perfiles y Paletas de Belleza Personalizadas             ║
 ║  🎬 Base de Datos de Películas y Recomendaciones             ║
 ║  😴 Coach Personal de Sueño y Rutinas                        ║
-║  🎯 Integración Multi-Servidor MCP                           ║
+║   Integración Multi-Servidor MCP                           ║
 ╚══════════════════════════════════════════════════════════════╝
 
-🚀 Cliente Multi-MCP iniciado
-📋 Usa /help para ver todos los comandos disponibles
+ Cliente Multi-MCP iniciado
+ Usa /help para ver todos los comandos disponibles
 """
         print(banner)
     
@@ -701,17 +701,17 @@ EJEMPLO: /sleep advice "no puedo dormir" """
         total_messages = len(self.conversation_history)
         connected_servers = sum(1 for s in self.servers.values() if s.active)
         
-        return f"""📊 ESTADÍSTICAS DE SESIÓN:
+        return f""" ESTADÍSTICAS DE SESIÓN:
 💬 Total mensajes: {total_messages}
 🔗 Servidores conectados: {connected_servers}/{len(self.servers)}
-🆔 ID de sesión: {self.session_id}
+ ID de sesión: {self.session_id}
 ⚙️ Servidores activos: {', '.join(s.display_name for s in self.servers.values() if s.active)}"""
     
     async def cleanup(self):
         """Limpiar recursos"""
         for server in self.servers.values():
             server.stop()
-        print("🧹 Todos los servidores desconectados")
+        print(" Todos los servidores desconectados")
 
 # Clases simples para cuando las vistas no están disponibles
 class SimpleConsoleView:
@@ -721,7 +721,7 @@ class SimpleConsoleView:
     def show_error(self, error): print(f"\n❌ {error}")
 
 class SimpleBeautyView:
-    def show_beauty_help(self): return "🎨 Beauty System"
+    def show_beauty_help(self): return " Beauty System"
     def collect_profile_data(self): return None
 
 async def main():
@@ -736,7 +736,7 @@ async def main():
             print("💡 Asegúrate de que los archivos de servidor estén disponibles")
             
     except KeyboardInterrupt:
-        print("\n👋 Cliente interrumpido por el usuario")
+        print("\n Cliente interrumpido por el usuario")
     except Exception as e:
         print(f"❌ Error inesperado: {str(e)}")
 

@@ -2,7 +2,7 @@
 
 Servidor MCP local especializado en paletas de colores y sistema de belleza personalizado.
 
-## 🎨 Características
+##  Características
 
 - **Perfiles Personalizados**: Crea perfiles basados en tono de piel, color de ojos, cabello y estilo
 - **Paletas Inteligentes**: Genera paletas para ropa, maquillaje y accesorios
@@ -10,12 +10,12 @@ Servidor MCP local especializado en paletas de colores y sistema de belleza pers
 - **Citas Inspiracionales**: Base de datos de citas de belleza y estilo
 - **Protocolo MCP**: Compatible con clientes MCP estándar
 
-## 📋 Requisitos
+##  Requisitos
 
 - Python 3.8 o superior
 - Biblioteca `mcp` instalada
 
-## 🚀 Instalación
+##  Instalación
 
 1. **Ejecutar el instalador:**
    ```bash
@@ -27,7 +27,7 @@ Servidor MCP local especializado en paletas de colores y sistema de belleza pers
    pip install mcp>=1.0.0
    ```
 
-## 🎯 Uso
+##  Uso
 
 ### Iniciar el Servidor
 
@@ -117,7 +117,7 @@ Este servidor MCP puede integrarse con:
 - Aplicaciones de moda y belleza
 - Sistemas de recomendación personalizados
 
-## 📊 Almacenamiento
+##  Almacenamiento
 
 - **Perfiles**: Almacenados en memoria durante la sesión
 - **Paletas**: Historial en memoria por usuario

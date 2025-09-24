@@ -293,7 +293,7 @@ EJEMPLOS:
             items = []
             for item in sorted(dir_path.iterdir()):
                 if item.is_dir():
-                    items.append(f"📁 {item.name}/")
+                    items.append(f" {item.name}/")
                 else:
                     size = item.stat().st_size
                     items.append(f"📄 {item.name} ({size} bytes)")
@@ -357,7 +357,7 @@ EJEMPLOS:
             dir_path = self.workspace_dir / dirname
             
             if dir_path.exists():
-                return f"⚠️  Directorio '{dirname}' ya existe"
+                return f"  Directorio '{dirname}' ya existe"
             
             dir_path.mkdir(parents=True, exist_ok=True)
             

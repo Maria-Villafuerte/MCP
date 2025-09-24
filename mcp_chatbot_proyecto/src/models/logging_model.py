@@ -405,7 +405,7 @@ if __name__ == "__main__":
     logger.log_claude_response("He creado tu perfil de belleza", 45, "session_123")
     
     # Mostrar estadísticas
-    print(f"\n📊 Estadísticas MCP: {logger.get_mcp_stats()}")
+    print(f"\n Estadísticas MCP: {logger.get_mcp_stats()}")
     print(f" Estadísticas Beauty: {logger.get_beauty_stats()}")
     
     print(" Logging Model funcionando correctamente")

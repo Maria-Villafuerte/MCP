@@ -63,7 +63,7 @@ def main():
         print("❌ No se encuentra beauty_mcp_server_local.py")
         return
     
-    print("🚀 Iniciando Beauty Palette MCP Server Local...")
+    print(" Iniciando Beauty Palette MCP Server Local...")
     
     try:
         subprocess.run([sys.executable, str(server_script)], check=True)
@@ -190,7 +190,7 @@ class BeautyMCPClient:
     
     async def demo(self):
         """Ejecutar demo del sistema"""
-        print("🎨 Demo del Beauty Palette MCP Server")
+        print(" Demo del Beauty Palette MCP Server")
         print("=" * 50)
         
         # Crear perfil de prueba
@@ -260,7 +260,7 @@ def create_readme():
 
 Servidor MCP local especializado en paletas de colores y sistema de belleza personalizado.
 
-## 🎨 Características
+##  Características
 
 - **Perfiles Personalizados**: Crea perfiles basados en tono de piel, color de ojos, cabello y estilo
 - **Paletas Inteligentes**: Genera paletas para ropa, maquillaje y accesorios
@@ -268,12 +268,12 @@ Servidor MCP local especializado en paletas de colores y sistema de belleza pers
 - **Citas Inspiracionales**: Base de datos de citas de belleza y estilo
 - **Protocolo MCP**: Compatible con clientes MCP estándar
 
-## 📋 Requisitos
+##  Requisitos
 
 - Python 3.8 o superior
 - Biblioteca `mcp` instalada
 
-## 🚀 Instalación
+##  Instalación
 
 1. **Ejecutar el instalador:**
    ```bash
@@ -285,7 +285,7 @@ Servidor MCP local especializado en paletas de colores y sistema de belleza pers
    pip install mcp>=1.0.0
    ```
 
-## 🎯 Uso
+##  Uso
 
 ### Iniciar el Servidor
 
@@ -375,7 +375,7 @@ Este servidor MCP puede integrarse con:
 - Aplicaciones de moda y belleza
 - Sistemas de recomendación personalizados
 
-## 📊 Almacenamiento
+##  Almacenamiento
 
 - **Perfiles**: Almacenados en memoria durante la sesión
 - **Paletas**: Historial en memoria por usuario
@@ -407,7 +407,7 @@ MIT License - Uso libre para proyectos personales y comerciales.
 
 def main():
     """Función principal del setup"""
-    print("🎨 Beauty Palette MCP Server - Setup Local")
+    print(" Beauty Palette MCP Server - Setup Local")
     print("=" * 50)
     
     # Verificar Python
@@ -424,7 +424,7 @@ def main():
     create_readme()
     
     print("\n✅ Setup completado exitosamente!")
-    print("\n🚀 Para iniciar el servidor:")
+    print("\n Para iniciar el servidor:")
     print("   python start_beauty_server.py")
     print("\n🧪 Para probar el servidor:")
     print("   python test_beauty_client.py")

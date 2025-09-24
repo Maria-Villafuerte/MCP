@@ -274,7 +274,7 @@ Sé específico y práctico en las recomendaciones."""
         """Limpiar recursos del servicio"""
         self.client = None
         self.is_initialized = False
-        print("🧹 Claude Service desconectado")
+        print(" Claude Service desconectado")
 
 
 # Testing del servicio
@@ -313,7 +313,7 @@ if __name__ == "__main__":
             
             # Info del modelo
             info = service.get_model_info()
-            print(f"📊 Info del modelo: {info}")
+            print(f" Info del modelo: {info}")
             
         else:
             print(" Error inicializando servicio")

@@ -82,7 +82,7 @@ class SessionModel:
         if len(self.conversation_history) > self.max_context_messages:
             removed_count = len(self.conversation_history) - self.max_context_messages
             self.conversation_history = self.conversation_history[-self.max_context_messages:]
-            print(f"ℹ️  Se removieron {removed_count} mensajes antiguos del contexto")
+            print(f"  Se removieron {removed_count} mensajes antiguos del contexto")
     
     def get_session_stats(self) -> Dict:
         """
@@ -143,7 +143,7 @@ class SessionModel:
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(session_data, f, indent=2, ensure_ascii=False)
-            print(f"💾 Sesión guardada en: {filepath}")
+            print(f" Sesión guardada en: {filepath}")
             return True
         except Exception as e:
             print(f" Error guardando sesión: {str(e)}")
@@ -169,7 +169,7 @@ class SessionModel:
             self.message_count = session_data.get("session_info", {}).get("total_messages", 0)
             
             print(f" Sesión cargada desde: {filepath}")
-            print(f"ℹ️  {len(self.conversation_history)} mensajes restaurados")
+            print(f"  {len(self.conversation_history)} mensajes restaurados")
             return True
             
         except FileNotFoundError:
@@ -208,12 +208,12 @@ class SessionModel:
         # Mostrar últimos 5 mensajes
         recent_messages = self.conversation_history[-5:]
         for i, msg in enumerate(recent_messages, 1):
-            role_icon = "" if msg["role"] == "user" else "🤖"
+            role_icon = "" if msg["role"] == "user" else ""
             content_preview = msg["content"][:60] + "..." if len(msg["content"]) > 60 else msg["content"]
             print(f"{i}. {role_icon} {content_preview}")
         
         stats = self.get_session_stats()
-        print(f"\n📊 Total: {stats['total_messages']} mensajes | En contexto: {stats['messages_in_context']}")
+        print(f"\n Total: {stats['total_messages']} mensajes | En contexto: {stats['messages_in_context']}")
 
 
 # Funciones de utilidad para testing
@@ -235,7 +235,7 @@ if __name__ == "__main__":
         print(f"  {msg['role']}: {msg['content']}")
     
     # Mostrar estadísticas
-    print(f"\n📊 Estadísticas: {session.get_session_stats()}")
+    print(f"\n Estadísticas: {session.get_session_stats()}")
     
     # Mostrar resumen
     session.show_context_summary()
@@ -244,4 +244,4 @@ if __name__ == "__main__":
     session.save_session("test_session.json")
     
     # Listar sesiones
-    print(f"\n📁 Sesiones guardadas: {session.list_saved_sessions()}")
+    print(f"\n Sesiones guardadas: {session.list_saved_sessions()}")

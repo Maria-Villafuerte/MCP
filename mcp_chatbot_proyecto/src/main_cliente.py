@@ -166,7 +166,7 @@ class MCPClient:
         # Mostrar mensaje de bienvenida
         self.chat_view.show_welcome_message()
         print(f"🔗 Conectado a servidor MCP: {self.server_script}")
-        print(f"🆔 ID de sesión: {self.session_id}\n")
+        print(f" ID de sesión: {self.session_id}\n")
         
         while True:
             try:
@@ -224,12 +224,12 @@ class MCPClient:
         if command_lower == '/help':
             return self.chat_view.get_help_message()
         elif command_lower == '/quit':
-            return "👋 Cerrando cliente..."
+            return " Cerrando cliente..."
         elif command_lower == '/context':
             return self._show_context_summary()
         elif command_lower == '/clear':
             self.conversation_history = []
-            return "🧹 Contexto limpiado"
+            return " Contexto limpiado"
         
         # Comandos que requieren servidor MCP
         elif command_lower.startswith('/beauty') or command_lower.startswith('/palette'):
@@ -246,15 +246,15 @@ class MCPClient:
     def _show_context_summary(self) -> str:
         """Mostrar resumen del contexto local"""
         if not self.conversation_history:
-            return "ℹ️ No hay mensajes en el contexto actual"
+            return " No hay mensajes en el contexto actual"
         
-        summary = "\n📋 RESUMEN DEL CONTEXTO ACTUAL:\n"
+        summary = "\n RESUMEN DEL CONTEXTO ACTUAL:\n"
         summary += "-" * 40 + "\n"
         
         # Mostrar últimos 5 mensajes
         recent_messages = self.conversation_history[-5:]
         for i, msg in enumerate(recent_messages, 1):
-            role_icon = "👤" if msg["role"] == "user" else "🤖"
+            role_icon = "👤" if msg["role"] == "user" else ""
             content_preview = msg["content"][:60] + "..." if len(msg["content"]) > 60 else msg["content"]
             summary += f"{i}. {role_icon} {content_preview}\n"
         
@@ -262,7 +262,7 @@ class MCPClient:
         user_messages = len([m for m in self.conversation_history if m["role"] == "user"])
         assistant_messages = len([m for m in self.conversation_history if m["role"] == "assistant"])
         
-        summary += f"\n📊 Total: {total_messages} mensajes | Usuario: {user_messages} | Asistente: {assistant_messages}"
+        summary += f"\n Total: {total_messages} mensajes | Usuario: {user_messages} | Asistente: {assistant_messages}"
         
         return summary
     
@@ -272,11 +272,11 @@ class MCPClient:
         user_messages = len([m for m in self.conversation_history if m["role"] == "user"])
         assistant_messages = len([m for m in self.conversation_history if m["role"] == "assistant"])
         
-        return f"""📊 ESTADÍSTICAS DE SESIÓN:
+        return f""" ESTADÍSTICAS DE SESIÓN:
 💬 Total mensajes: {total_messages}
 👤 Mensajes usuario: {user_messages}  
-🤖 Mensajes asistente: {assistant_messages}
-🆔 ID de sesión: {self.session_id}
+ Mensajes asistente: {assistant_messages}
+ ID de sesión: {self.session_id}
 🔗 Servidor: {self.server_script}"""
     
     async def handle_beauty_command(self, command: str) -> str:
@@ -330,13 +330,13 @@ class MCPClient:
             profile_data = self.beauty_view.collect_profile_data()
             
             if not profile_data:
-                return "ℹ️ Creación de perfil cancelada"
+                return " Creación de perfil cancelada"
             
             # Usar la herramienta MCP create_profile
             response = await self._call_mcp_tool("create_profile", profile_data)
             
             if response and "creado" in response.lower():
-                return f"✅ {response}\n\n💄 Ahora puedes generar paletas con /palette"
+                return f"✅ {response}\n\n Ahora puedes generar paletas con /palette"
             else:
                 return f"❌ Error creando perfil: {response}"
                 
@@ -438,7 +438,7 @@ EJEMPLOS DE USO:
             except Exception:
                 pass
         
-        print("🧹 Cliente MCP desconectado")
+        print(" Cliente MCP desconectado")
 
 def show_banner():
     """Mostrar banner del cliente MCP"""
@@ -448,10 +448,8 @@ def show_banner():
 ║              Conectando a Servidor MCP Local                 ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  🔗 Protocolo MCP via stdio                                  ║
-║  🤖 Claude API via Servidor MCP                              ║
-║  💄 Sistema de Belleza Remoto                                ║
-║  🌟 Citas Inspiracionales                                    ║
-║  📁 Gestión de Archivos                                      ║
+║   Claude API via Servidor MCP                              ║
+║   Sistema de Belleza Remoto                                ║
 ╚══════════════════════════════════════════════════════════════╝
 """
     print(banner)
@@ -471,7 +469,7 @@ async def main():
             print("💡 Asegúrate de que server_local.py esté disponible")
             
     except KeyboardInterrupt:
-        print("\n👋 Cliente interrumpido por el usuario")
+        print("\n Cliente interrumpido por el usuario")
     except Exception as e:
         print(f"❌ Error inesperado: {str(e)}")
         import traceback

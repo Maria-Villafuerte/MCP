@@ -182,7 +182,7 @@ class BeautyMCPClient:
         while True:
             try:
                 # Obtener entrada del usuario
-                user_input = input("\n🎨 Beauty MCP > ").strip()
+                user_input = input("\n Beauty MCP > ").strip()
                 
                 # Procesar salida
                 if user_input.lower() == '/quit':
@@ -204,7 +204,7 @@ class BeautyMCPClient:
         
         # Limpiar recursos
         await self.cleanup()
-        print("\n👋 Cliente MCP desconectado. ¡Hasta pronto!")
+        print("\n Cliente MCP desconectado. ¡Hasta pronto!")
     
     async def process_user_input(self, user_input: str) -> str:
         """Procesar entrada del usuario"""
@@ -219,9 +219,9 @@ class BeautyMCPClient:
             # Mensaje normal - intentar obtener cita inspiracional relacionada
             if any(word in user_input.lower() for word in ["belleza", "estilo", "moda", "color"]):
                 quote = await self._call_mcp_tool("get_inspirational_quote", {"category": "estilo"})
-                return f"💭 {quote}\n\n💡 Tip: Usa comandos como /beauty o /palette para funciones específicas"
+                return f" {quote}\n\n💡 Tip: Usa comandos como /beauty o /palette para funciones específicas"
             else:
-                return "🎨 ¡Hola! Soy tu asistente de belleza MCP. Usa /help para ver comandos disponibles."
+                return " ¡Hola! Soy tu asistente de belleza MCP. Usa /help para ver comandos disponibles."
             
         except Exception as e:
             return f"❌ Error procesando mensaje: {str(e)}"
@@ -234,12 +234,12 @@ class BeautyMCPClient:
         if command_lower == '/help':
             return self.get_help_message()
         elif command_lower == '/quit':
-            return "👋 Cerrando cliente..."
+            return " Cerrando cliente..."
         elif command_lower == '/context':
             return self._show_context_summary()
         elif command_lower == '/clear':
             self.conversation_history = []
-            return "🧹 Contexto limpiado"
+            return " Contexto limpiado"
         elif command_lower == '/stats':
             return self._get_local_stats()
         
@@ -294,7 +294,7 @@ class BeautyMCPClient:
     async def create_profile_interactive(self) -> str:
         """Crear perfil de forma interactiva usando MCP"""
         try:
-            print("\n🎨 CREACIÓN DE PERFIL DE BELLEZA")
+            print("\n CREACIÓN DE PERFIL DE BELLEZA")
             print("=" * 50)
             
             # Recopilar datos del perfil
@@ -307,7 +307,7 @@ class BeautyMCPClient:
                 return "❌ Nombre es requerido"
             
             # Características físicas
-            print("\n🌈 CARACTERÍSTICAS FÍSICAS:")
+            print("\n CARACTERÍSTICAS FÍSICAS:")
             
             print("Tono de piel:")
             print("  1. clara")
@@ -378,7 +378,7 @@ class BeautyMCPClient:
             
             response = await self._call_mcp_tool("create_beauty_profile", profile_data)
             
-            return f"{response}\n\n💄 ¡Ahora puedes generar paletas con /palette!"
+            return f"{response}\n\n ¡Ahora puedes generar paletas con /palette!"
                 
         except (KeyboardInterrupt, ValueError):
             return "❌ Creación de perfil cancelada"
@@ -408,7 +408,7 @@ EJEMPLO: /palette ropa maria_123 trabajo"""
             if event_type not in ["casual", "trabajo", "formal", "fiesta", "cita"]:
                 return "❌ Evento no válido. Opciones: casual, trabajo, formal, fiesta, cita"
             
-            print(f"🎨 Generando paleta {palette_type} para {event_type}...")
+            print(f" Generando paleta {palette_type} para {event_type}...")
             
             # Llamar al servidor MCP
             response = await self._call_mcp_tool("generate_color_palette", {
@@ -474,21 +474,21 @@ Los colores deben estar en formato hexadecimal (#RRGGBB)"""
     def _show_context_summary(self) -> str:
         """Mostrar resumen del contexto local"""
         if not self.conversation_history:
-            return "ℹ️ No hay mensajes en el contexto actual"
+            return " No hay mensajes en el contexto actual"
         
-        summary = "\n📋 RESUMEN DEL CONTEXTO ACTUAL:\n"
+        summary = "\n RESUMEN DEL CONTEXTO ACTUAL:\n"
         summary += "-" * 40 + "\n"
         
         recent_messages = self.conversation_history[-5:]
         for i, msg in enumerate(recent_messages, 1):
-            role_icon = "👤" if msg["role"] == "user" else "🎨"
+            role_icon = "👤" if msg["role"] == "user" else ""
             content_preview = msg["content"][:60] + "..." if len(msg["content"]) > 60 else msg["content"]
             summary += f"{i}. {role_icon} {content_preview}\n"
         
         total_messages = len(self.conversation_history)
         user_messages = len([m for m in self.conversation_history if m["role"] == "user"])
         
-        summary += f"\n📊 Total: {total_messages} mensajes | Usuario: {user_messages}"
+        summary += f"\n Total: {total_messages} mensajes | Usuario: {user_messages}"
         
         return summary
     
@@ -497,15 +497,15 @@ Los colores deben estar en formato hexadecimal (#RRGGBB)"""
         total_messages = len(self.conversation_history)
         user_messages = len([m for m in self.conversation_history if m["role"] == "user"])
         
-        return f"""📊 ESTADÍSTICAS DE SESIÓN:
+        return f""" ESTADÍSTICAS DE SESIÓN:
 💬 Total mensajes: {total_messages}
 👤 Mensajes usuario: {user_messages}
-🆔 ID de sesión: {self.session_id}
+ ID de sesión: {self.session_id}
 🔗 Servidor: {self.server_script}"""
     
     def get_help_message(self) -> str:
         """Mostrar mensaje de ayuda"""
-        return """🎨 BEAUTY PALETTE MCP CLIENT - AYUDA
+        return """ BEAUTY PALETTE MCP CLIENT - AYUDA
 
 COMANDOS DE BELLEZA:
   /beauty help                 - Ayuda del sistema de belleza
@@ -547,7 +547,7 @@ FLUJO RECOMENDADO:
     
     def get_beauty_help(self) -> str:
         """Ayuda específica de belleza"""
-        return """🎨 SISTEMA DE BELLEZA MCP
+        return """ SISTEMA DE BELLEZA MCP
 
 GESTIÓN DE PERFILES:
   /beauty create               - Crear perfil personalizado
@@ -586,19 +586,19 @@ EJEMPLO COMPLETO:
         banner = """
 ╔══════════════════════════════════════════════════════════════╗
 ║                Beauty Palette MCP Client                     ║
-║            🎨 Tu Asistente Personal de Belleza 🎨            ║
+║             Tu Asistente Personal de Belleza             ║
 ╠══════════════════════════════════════════════════════════════╣
-║  ✨ Perfiles Personalizados de Belleza                       ║
-║  🌈 Generación Inteligente de Paletas                        ║
-║  💄 Recomendaciones de Maquillaje                            ║
-║  👗 Coordinación de Ropa y Accesorios                        ║
-║  🎯 Análisis de Armonía de Colores                           ║
-║  💭 Citas Inspiracionales de Belleza                         ║
+║   Perfiles Personalizados de Belleza                       ║
+║   Generación Inteligente de Paletas                        ║
+║   Recomendaciones de Maquillaje                            ║
+║   Coordinación de Ropa y Accesorios                        ║
+║   Análisis de Armonía de Colores                           ║
+║   Citas Inspiracionales de Belleza                         ║
 ╚══════════════════════════════════════════════════════════════╝
 
-🚀 Conectado al Beauty Palette MCP Server Local
-📋 Usa /help para ver todos los comandos disponibles
-🎨 ¡Comienza creando tu perfil con /beauty create!
+ Conectado al Beauty Palette MCP Server Local
+ Usa /help para ver todos los comandos disponibles
+ ¡Comienza creando tu perfil con /beauty create!
 """
         print(banner)
     
@@ -613,12 +613,12 @@ EJEMPLO COMPLETO:
             except Exception:
                 pass
         
-        print("🧹 Cliente MCP desconectado")
+        print(" Cliente MCP desconectado")
 
 # Clases simples para cuando las vistas no están disponibles
 class SimpleConsoleView:
     def show_welcome_message(self):
-        print("🎨 Beauty MCP Client - Bienvenido")
+        print(" Beauty MCP Client - Bienvenido")
     
     def get_user_input(self):
         return input("\n> ").strip()
@@ -630,11 +630,11 @@ class SimpleConsoleView:
         print(f"\n❌ {error}")
     
     def show_goodbye(self):
-        print("\n👋 ¡Hasta pronto!")
+        print("\n ¡Hasta pronto!")
 
 class SimpleBeautyView:
     def show_beauty_help(self):
-        return "🎨 Sistema de Belleza - Usa /beauty help para más información"
+        return " Sistema de Belleza - Usa /beauty help para más información"
     
     def collect_profile_data(self):
         # Implementación simple si no hay vista avanzada
@@ -642,7 +642,7 @@ class SimpleBeautyView:
 
 async def main():
     """Función principal del cliente MCP de belleza"""
-    print("🎨 Iniciando Beauty Palette MCP Client...")
+    print(" Iniciando Beauty Palette MCP Client...")
     
     try:
         # Inicializar cliente MCP
@@ -655,7 +655,7 @@ async def main():
             print("💡 Asegúrate de que beauty_mcp_server_local.py esté disponible")
             
     except KeyboardInterrupt:
-        print("\n👋 Cliente interrumpido por el usuario")
+        print("\n Cliente interrumpido por el usuario")
     except Exception as e:
         print(f"❌ Error inesperado: {str(e)}")
         import traceback

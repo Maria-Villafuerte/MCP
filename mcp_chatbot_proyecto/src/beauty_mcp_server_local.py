@@ -574,10 +574,10 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
         if name == "create_beauty_profile":
             profile = beauty_server.create_profile(arguments)
             result = f"✅ Perfil creado para {profile.name} (ID: {profile.user_id})\n"
-            result += f"🎨 Tono de piel: {profile.skin_tone} ({profile.undertone})\n"
+            result += f" Tono de piel: {profile.skin_tone} ({profile.undertone})\n"
             result += f"👁️ Color de ojos: {profile.eye_color}\n"
             result += f"💇‍♀️ Cabello: {profile.hair_color} ({profile.hair_type})\n"
-            result += f"✨ Estilo: {profile.style_preference}\n"
+            result += f" Estilo: {profile.style_preference}\n"
             result += f"📅 Creado: {profile.created_at[:19].replace('T', ' ')}"
             
             return [types.TextContent(type="text", text=result)]
@@ -595,15 +595,15 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             
             palette = beauty_server.generate_palette(profile, palette_type, event_type, preferences)
             
-            result = f"🎨 PALETA DE {palette_type.upper()} - {event_type.upper()}\n"
+            result = f" PALETA DE {palette_type.upper()} - {event_type.upper()}\n"
             result += f"👤 Usuario: {profile.name} ({user_id})\n"
             result += f"🗓️ Generada: {palette.created_at[:19].replace('T', ' ')}\n\n"
             
-            result += "🌈 COLORES:\n"
+            result += " COLORES:\n"
             for i, color in enumerate(palette.colors, 1):
                 result += f"{i:2d}. {color['name']:20} | {color['hex']} | {color['category']}\n"
             
-            result += f"\n📊 ANÁLISIS DE ARMONÍA:\n"
+            result += f"\n ANÁLISIS DE ARMONÍA:\n"
             harmony = palette.recommendations.get("harmony_analysis", {})
             result += f"Tipo: {harmony.get('harmony_type', 'N/A')}\n"
             result += f"Puntuación: {harmony.get('harmony_score', 0)}/100\n"
@@ -623,11 +623,11 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
                 return [types.TextContent(type="text", text=f"❌ Perfil '{user_id}' no encontrado")]
             
             result = f"👤 PERFIL DE BELLEZA: {profile.name.upper()}\n\n"
-            result += f"🆔 ID: {profile.user_id}\n"
-            result += f"🎨 Tono de piel: {profile.skin_tone.title()} ({profile.undertone.title()})\n"
+            result += f" ID: {profile.user_id}\n"
+            result += f" Tono de piel: {profile.skin_tone.title()} ({profile.undertone.title()})\n"
             result += f"👁️ Color de ojos: {profile.eye_color.title()}\n"
             result += f"💇‍♀️ Cabello: {profile.hair_color.title()} ({profile.hair_type.title()})\n"
-            result += f"✨ Estilo: {profile.style_preference.title()}\n"
+            result += f" Estilo: {profile.style_preference.title()}\n"
             result += f"📅 Creado: {profile.created_at[:19].replace('T', ' ')}\n"
             result += f"🔄 Actualizado: {profile.updated_at[:19].replace('T', ' ')}\n"
             
@@ -638,7 +638,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
                 for rec in skin_data.get("recommendations", [])[:3]:
                     result += f"• {rec}\n"
                 
-                result += f"\n🎯 MEJORES COLORES: {', '.join(skin_data.get('best_colors', [])[:5])}\n"
+                result += f"\n MEJORES COLORES: {', '.join(skin_data.get('best_colors', [])[:5])}\n"
                 result += f"❌ EVITAR: {', '.join(skin_data.get('avoid_colors', [])[:3])}\n"
             
             return [types.TextContent(type="text", text=result)]
@@ -647,7 +647,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             profiles = beauty_server.list_profiles()
             
             if not profiles:
-                return [types.TextContent(type="text", text="ℹ️ No hay perfiles de belleza creados")]
+                return [types.TextContent(type="text", text=" No hay perfiles de belleza creados")]
             
             result = f"👥 PERFILES DE BELLEZA DISPONIBLES ({len(profiles)}):\n\n"
             for i, profile_id in enumerate(profiles, 1):
@@ -655,7 +655,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
                 if profile:
                     result += f"{i:2d}. {profile.name:20} | {profile_id:15} | {profile.skin_tone}/{profile.undertone}\n"
             
-            result += f"\n📊 Total: {len(profiles)} perfiles registrados"
+            result += f"\n Total: {len(profiles)} perfiles registrados"
             
             return [types.TextContent(type="text", text=result)]
         
@@ -669,14 +669,14 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             palettes = beauty_server.get_user_palettes(user_id)
             
             if not palettes:
-                return [types.TextContent(type="text", text=f"ℹ️ No hay historial de paletas para {profile.name}")]
+                return [types.TextContent(type="text", text=f" No hay historial de paletas para {profile.name}")]
             
             result = f"📈 HISTORIAL DE PALETAS - {profile.name.upper()}\n\n"
             for i, palette in enumerate(palettes[-10:], 1):  # Últimas 10
                 date = palette.created_at[:10]
                 result += f"{i:2d}. {date} | {palette.palette_type.title():12} | {palette.event_type.title():10} | {len(palette.colors)} colores\n"
             
-            result += f"\n📊 Total: {len(palettes)} paletas generadas"
+            result += f"\n Total: {len(palettes)} paletas generadas"
             
             return [types.TextContent(type="text", text=result)]
         
@@ -684,7 +684,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             category = arguments.get("category")
             quote = beauty_server.get_inspirational_quote(category)
             
-            result = f"✨ CITA INSPIRACIONAL\n\n"
+            result = f" CITA INSPIRACIONAL\n\n"
             result += f'"{quote["quote"]}"\n\n'
             result += f"— {quote['author']}\n"
             result += f"📝 Categoría: {quote['category'].title()}\n"
@@ -700,16 +700,16 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
             
             analysis = beauty_server._analyze_color_harmony(colors)
             
-            result = f"🎨 ANÁLISIS DE ARMONÍA DE COLORES\n\n"
-            result += f"🎯 Colores analizados: {len(colors)}\n"
-            result += f"📊 Puntuación de armonía: {analysis.get('harmony_score', 0)}/100\n"
+            result = f" ANÁLISIS DE ARMONÍA DE COLORES\n\n"
+            result += f" Colores analizados: {len(colors)}\n"
+            result += f" Puntuación de armonía: {analysis.get('harmony_score', 0)}/100\n"
             result += f"🔄 Tipo de armonía: {analysis.get('harmony_type', 'N/A')}\n"
             result += f"📝 Análisis: {analysis.get('analysis', 'N/A')}\n"
             
             if 'average_hue_difference' in analysis:
                 result += f"📐 Diferencia promedio de matiz: {analysis['average_hue_difference']}°\n"
             
-            result += f"\n🌈 COLORES ANALIZADOS:\n"
+            result += f"\n COLORES ANALIZADOS:\n"
             for i, color in enumerate(colors, 1):
                 result += f"{i}. {color}\n"
             
@@ -723,7 +723,7 @@ async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent
 
 async def main():
     """Función principal del servidor MCP"""
-    print("🎨 Iniciando Beauty Palette MCP Server Local...")
+    print(" Iniciando Beauty Palette MCP Server Local...")
     print(f"📍 Servidor: {beauty_server.server_name}")
     print(f"🔢 Versión: {beauty_server.version}")
     print("🔧 Herramientas disponibles:")

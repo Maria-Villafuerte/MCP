@@ -101,7 +101,7 @@ class BeautyMCPClient:
     
     async def demo(self):
         """Ejecutar demo del sistema"""
-        print("🎨 Demo del Beauty Palette MCP Server")
+        print(" Demo del Beauty Palette MCP Server")
         print("=" * 50)
         
         # Crear perfil de prueba

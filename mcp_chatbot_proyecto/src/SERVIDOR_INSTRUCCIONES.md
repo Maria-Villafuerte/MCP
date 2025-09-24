@@ -25,7 +25,7 @@ python3 server_local.py
 ```
 
 **El servidor estará disponible en:**
-- 🌐 **API**: http://localhost:8000
+-  **API**: http://localhost:8000
 - 📚 **Documentación**: http://localhost:8000/docs  
 - 🏥 **Health Check**: http://localhost:8000/health
 
