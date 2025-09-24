@@ -4,6 +4,9 @@
 # Claude API
 anthropic>=0.28.0
 
+# MCP (Model Context Protocol)
+mcp>=1.0.0
+
 # HTTP cliente para servicios remotos
 httpx>=0.26.0
 
@@ -32,3 +35,7 @@ mypy>=1.0.0                # Type checking
 # Dependencias para interfaz avanzada (opcional)
 rich>=13.0.0               # Terminal mejorado
 colorama>=0.4.6            # Colores en Windows
+
+fastmcp>=0.1.0
+requests>=2.31.0
+python-dotenv>=1.0.0

@@ -1,12 +1,12 @@
 {
   "user_id": "MajoV",
-  "name": "Maria Villafuerte",
-  "skin_tone": "media",
+  "name": "majo",
+  "skin_tone": "clara",
   "undertone": "frio",
-  "eye_color": "verde",
-  "hair_color": "castano",
+  "eye_color": "azul",
+  "hair_color": "rubio",
   "hair_type": "liso",
-  "style_preference": "romantico",
-  "created_at": "2025-09-22T18:31:51.127067",
-  "updated_at": "2025-09-22T18:31:51.127102"
+  "style_preference": "clasico",
+  "created_at": "2025-09-23T18:09:50.886928",
+  "updated_at": "2025-09-23T18:09:50.886940"
 }

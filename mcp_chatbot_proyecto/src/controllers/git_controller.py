@@ -87,7 +87,7 @@ class GitController:
                 return await self._handle_git_command(action, parts[2:])
             
             else:
-                return "Comando no reconocido. Usa /git help o /fs help"
+                return "Comando no reconocido. /help"
         
         except Exception as e:
             error_msg = f"Error procesando comando: {str(e)}"

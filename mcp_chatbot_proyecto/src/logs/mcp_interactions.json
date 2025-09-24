@@ -102,5 +102,25 @@
       "timestamp": "2025-09-23T17:26:18.123741"
     },
     "error": null
+  },
+  {
+    "timestamp": "2025-09-23T17:28:16.204178",
+    "server": "quotes_remote",
+    "action": "get_quote",
+    "parameters": {
+      "category": "motivacion"
+    },
+    "success": true,
+    "result": {
+      "success": true,
+      "data": {
+        "quote": "El estilo es una manera de decir quién eres sin tener que hablar",
+        "author": "Rachel Zoe",
+        "category": "estilo",
+        "timestamp": "2025-09-23T23:30:12.682324"
+      },
+      "server_info": "Beauty Palette MCP Server"
+    },
+    "error": null
   }
 ]
