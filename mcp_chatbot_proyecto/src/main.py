@@ -40,14 +40,14 @@ def show_banner():
     """Mostrar banner de inicio"""
     banner = """
 ╔══════════════════════════════════════════════════════════════╗
-║                        MCPChatbot v2.0                      ║
-║              Chat Inteligente con Sistema de Belleza        ║
+║                        MCPChatbot v2.0                       ║
+║              Chat Inteligente con Sistema de Belleza         ║
 ╠══════════════════════════════════════════════════════════════╣
-║   Claude API Integration                                   ║
-║   Sistema de Paletas de Colores Avanzado                  ║
-║   Recomendaciones de Belleza Personalizadas               ║
-║   Gestión de Perfiles y Historial                         ║
-║   Gestión de Archivos y Git                               ║
+║   Claude API Integration                                     ║
+║   Sistema de Paletas de Colores Avanzado                     ║
+║   Recomendaciones de Belleza Personalizadas                  ║
+║   Gestión de Perfiles y Historial                            ║
+║   Gestión de Archivos y Git                                  ║
 ╚══════════════════════════════════════════════════════════════╝
 """
     print(banner)
