@@ -15,6 +15,60 @@ class BeautyService:
         self.color_theory = ColorTheoryEngine()
         self.palette_generator = PaletteGenerator(self.color_theory)
         self.trend_analyzer = TrendAnalyzer()
+        self.eventos = ["casual", "formal", "fiesta", "trabajo", "cita", "deporte", "viaje"]
+
+    def interpret_natural_command(self, text: str) -> Optional[str]:
+            """
+            Convierte una frase en lenguaje natural en un comando interno (/palette, /beauty, etc.)
+            """
+            text = text.lower()
+
+            # Crear perfil
+            if "crear perfil" in text or "nuevo perfil" in text:
+                return "/beauty create_profile"
+
+            # Ver perfil
+            if "ver perfil" in text or "mostrar perfil" in text:
+                user_id = self._extraer_usuario(text)
+                return f"/beauty profile {user_id}"
+
+            # Historial
+            if "historial" in text or "paletas anteriores" in text:
+                user_id = self._extraer_usuario(text)
+                return f"/beauty history {user_id}"
+
+            # Listar perfiles
+            if "listar perfiles" in text or "todos los perfiles" in text:
+                return "/beauty list_profiles"
+
+            # Paletas
+            if "paleta" in text or "colores" in text:
+                user_id = self._extraer_usuario(text)
+                evento = self._extraer_evento(text)
+
+                if "maquillaje" in text:
+                    return f"/palette maquillaje {user_id} {evento}"
+                elif "ropa" in text:
+                    return f"/palette ropa {user_id} {evento}"
+                elif "accesorio" in text or "accesorios" in text:
+                    return f"/palette accesorios {user_id} {evento}"
+                else:
+                    return f"/palette quick ropa {evento}"
+
+            return None  # No entendió
+
+    # --- Helpers ---
+    def _extraer_usuario(self, text: str) -> str:
+        """Busca un user_id en el texto (ej: maria_123)"""
+        match = re.search(r"\b[a-zA-Z0-9_]{3,}\b", text)
+        return match.group(0) if match else "default_user"
+
+    def _extraer_evento(self, text: str) -> str:
+        """Busca un evento conocido en el texto"""
+        for evento in self.eventos:
+            if evento in text:
+                return evento
+        return "casual"
     
     async def generate_advanced_palette(self, profile: BeautyProfile, palette_type: str, 
                                       event_type: str, preferences: Dict = None) -> ColorPalette:

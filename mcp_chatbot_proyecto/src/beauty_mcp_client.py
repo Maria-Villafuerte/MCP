@@ -12,6 +12,8 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Any, Dict, Optional
+from views.beauty_view import BeautyView
+
 
 # Agregar src al path para imports de vistas (si existen)
 src_path = Path(__file__).parent / "src"
@@ -34,6 +36,8 @@ class BeautyMCPClient:
         self.server_process = None
         self.message_id = 0
         self.conversation_history = []
+        self.bv = BeautyView()
+
         
         # Usar vistas si están disponibles, sino usar versiones simples
         if VIEWS_AVAILABLE:
@@ -43,6 +47,25 @@ class BeautyMCPClient:
             self.chat_view = SimpleConsoleView()
             self.beauty_view = SimpleBeautyView()
     
+
+    async def run_interactive_mode(self):
+        print(" Modo interactivo iniciado. Escribe 'salir' para terminar.")
+
+        while True:
+            user_input = input(" > ")
+
+            if user_input.lower() in ["salir", "exit", "quit"]:
+                print(" Cerrando chatbot...")
+                break
+
+            # --- Usamos el intérprete ---
+            interpreted = self.bv.interpret_natural_command(user_input)
+
+            if interpreted:
+                print(f" [Interpretado como comando interno: {interpreted}]")
+                await self.handle_command(interpreted)
+            else:
+                await self.handle_command(user_input)
     async def initialize(self) -> bool:
         """Inicializar conexión con servidor MCP de belleza"""
         try:
@@ -174,37 +197,37 @@ class BeautyMCPClient:
         except Exception as e:
             return f"Error llamando herramienta MCP: {str(e)}"
     
-    async def run_interactive_mode(self):
-        """Ejecutar modo interactivo conectado al servidor MCP de belleza"""
-        # Mostrar mensaje de bienvenida
-        self.show_welcome()
+    # async def run_interactive_mode(self):
+    #     """Ejecutar modo interactivo conectado al servidor MCP de belleza"""
+    #     # Mostrar mensaje de bienvenida
+    #     self.show_welcome()
         
-        while True:
-            try:
-                # Obtener entrada del usuario
-                user_input = input("\n Beauty MCP > ").strip()
+    #     while True:
+    #         try:
+    #             # Obtener entrada del usuario
+    #             user_input = input("\n Beauty MCP > ").strip()
                 
-                # Procesar salida
-                if user_input.lower() == '/quit':
-                    break
-                elif not user_input:
-                    continue
+    #             # Procesar salida
+    #             if user_input.lower() == '/quit':
+    #                 break
+    #             elif not user_input:
+    #                 continue
                 
-                # Procesar comando o mensaje
-                response = await self.process_user_input(user_input)
+    #             # Procesar comando o mensaje
+    #             response = await self.process_user_input(user_input)
                 
-                # Mostrar respuesta
-                if response:
-                    print("\n" + response)
+    #             # Mostrar respuesta
+    #             if response:
+    #                 print("\n" + response)
                 
-            except KeyboardInterrupt:
-                break
-            except Exception as e:
-                print(f"❌ Error procesando entrada: {str(e)}")
+    #         except KeyboardInterrupt:
+    #             break
+    #         except Exception as e:
+    #             print(f"❌ Error procesando entrada: {str(e)}")
         
-        # Limpiar recursos
-        await self.cleanup()
-        print("\n Cliente MCP desconectado. ¡Hasta pronto!")
+    #     # Limpiar recursos
+    #     await self.cleanup()
+    #     print("\n Cliente MCP desconectado. ¡Hasta pronto!")
     
     async def process_user_input(self, user_input: str) -> str:
         """Procesar entrada del usuario"""

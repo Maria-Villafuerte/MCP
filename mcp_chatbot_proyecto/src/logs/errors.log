@@ -1,0 +1,1 @@
+2025-09-23 20:15:20,063 - MCPChatbot - ERROR - BEAUTY_INTERACTION | ERROR | Action: create_profile | User: None | Error: Error creando perfil: 'NoneType' object has no attribute 'lower'

@@ -88,5 +88,14 @@
     "success": true,
     "result": "Paleta ropa para boda",
     "error": null
+  },
+  {
+    "timestamp": "2025-09-23T20:15:20.062743",
+    "action": "create_profile",
+    "user_id": null,
+    "palette_type": null,
+    "success": false,
+    "result": null,
+    "error": "Error creando perfil: 'NoneType' object has no attribute 'lower'"
   }
 ]

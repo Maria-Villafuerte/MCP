@@ -37,6 +37,19 @@ class MainController:
         self.is_initialized = False
         self.session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     
+
+    async def run_interactive_mode(self):
+        print(" Modo interactivo iniciado. Escribe 'salir' para terminar.")
+
+        while True:
+            user_input = input(" > ")
+
+            if user_input.lower() in ["salir", "exit", "quit"]:
+                print(" Cerrando chatbot...")
+                break
+
+            # Aquí normalmente procesas comandos directos tipo /beauty o /palette
+            await self.handle_command(user_input)
     async def initialize(self) -> bool:
         """Inicializar todos los componentes del sistema"""
         try:
