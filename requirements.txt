@@ -1,7 +1,28 @@
-# Dependencias para el sistema de belleza MCP
+# Dependencias principales MCP
 mcp>=1.0.0
 anthropic>=0.40.0
+
+# Dependencias para clientes
 python-dotenv>=1.0.0
 prompt-toolkit>=3.0.0
 PyYAML>=6.0.0
-asyncio
+httpx>=0.25.0
+
+# Dependencias para análisis de datos (servidor de juegos)
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Dependencias para servidor web remoto
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Utilidades adicionales
+pathlib2>=2.3.7
+typing-extensions>=4.5.0
+
+# Para análisis de colores (beauty server)
+# No hay dependencias externas adicionales necesarias para colorsys (built-in)
+
+# Dependencias para sleep coach
+dataclasses>=0.6.0  # Aunque es built-in en Python 3.7+, por compatibilidad

@@ -1,4 +1,4 @@
-# Configuración Universal de Servidores MCP
+# Configuración Universal de Servidores MCP - RUTAS CORREGIDAS
 # Este archivo define todos los servidores disponibles para el cliente universal
 
 # Configuración global
@@ -8,14 +8,14 @@ global_settings:
   timeout_seconds: 30
   log_level: "INFO"
 
-# Definición de servidores MCP
+# Definición de servidores MCP con RUTAS ABSOLUTAS CORREGIDAS
 servers:
   beauty_server:
     name: "Beauty & Color Analysis Server"
     description: "Servidor especializado en análisis de belleza, colorimetría y paletas personales"
     command: "python"
     args: 
-      - "Servidores/Local/beauty_server.py"
+      - "Servidores/Local/beauty_server.py"  # Ruta corregida
     env: {}
     cwd: "."
     enabled: true
@@ -35,6 +35,8 @@ servers:
       - "temporada"
       - "subtono"
       - "belleza"
+      - "crear"
+      - "generar"
     tools:
       - create_profile
       - show_profile
@@ -49,7 +51,7 @@ servers:
     description: "Servidor de coaching personalizado de sueño y rutinas de descanso"
     command: "python"
     args:
-      - "Servidores/Local/sleep_coach.py"
+      - "Servidores/Externos/Fabi/sleep_coach.py"  # Ruta corregida
     env: {}
     cwd: "."
     enabled: true
@@ -69,6 +71,8 @@ servers:
       - "horario"
       - "cronotipos"
       - "descanso"
+      - "perfil"
+      - "crear"
     tools:
       - create_user_profile
       - update_user_profile
@@ -82,7 +86,7 @@ servers:
     description: "Servidor de análisis de datos y estadísticas de videojuegos"
     command: "python"
     args:
-      - "Servidores/Local/server.py"
+      - "Servidores/Externos/JP/server.py"  # Ruta corregida
     env: {}
     cwd: "."
     enabled: true
@@ -102,6 +106,8 @@ servers:
       - "ventas"
       - "ranking"
       - "publisher"
+      - "top"
+      - "mejor"
     tools:
       - game_info
       - count_games_by_genre
