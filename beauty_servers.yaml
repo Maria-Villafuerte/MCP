@@ -1,0 +1,24 @@
+client_settings:
+  auto_switch_on_error: true
+  max_retries: 3
+  preferred_mode: auto
+connection_mode: auto
+context:
+  file: Data/beauty_context.json
+  max_history: 100
+  save_conversations: true
+logging:
+  enabled: true
+  file: Data/beauty_log.txt
+  level: info
+remote_server:
+  backup_url: http://localhost:8000
+  timeout: 30
+  url: https://beauty-pallet-server.railway.app
+servers:
+  beauty_server:
+    args:
+    - Servidores/Local/beauty_server.py
+    command: python
+    cwd: .
+    env: {}

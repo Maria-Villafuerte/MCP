@@ -82,7 +82,7 @@ cp .env.example .env
 python main.py
 ```
 
-## ⚙️ Configuración
+##  Configuración
 
 ### Variables de Entorno (.env)
 ```bash
@@ -206,7 +206,7 @@ Para recomendaciones generales:
 obtener recomendaciones más específicas?
 ```
 
-## 🔧 Desarrollo
+##  Desarrollo
 
 ### Estructura de Clases Principales
 
@@ -257,7 +257,7 @@ El sistema se conecta a un servidor MCP remoto para citas inspiracionales:
 - Tasa de éxito de operaciones MCP
 - Tiempo de sesión y mensajes procesados
 
-## 🛠️ Solución de Problemas
+##  Solución de Problemas
 
 ### Errores Comunes
 
