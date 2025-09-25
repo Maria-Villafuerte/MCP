@@ -1,0 +1,162 @@
+# Configuración Universal de Servidores MCP
+# Este archivo define todos los servidores disponibles para el cliente universal
+
+# Configuración global
+global_settings:
+  anthropic_model: "claude-3-5-haiku-20241022"
+  max_retries: 3
+  timeout_seconds: 30
+  log_level: "INFO"
+
+# Definición de servidores MCP
+servers:
+  beauty_server:
+    name: "Beauty & Color Analysis Server"
+    description: "Servidor especializado en análisis de belleza, colorimetría y paletas personales"
+    command: "python"
+    args: 
+      - "Servidores/Local/beauty_server.py"
+    env: {}
+    cwd: "."
+    enabled: true
+    priority: 1
+    categories:
+      - "belleza"
+      - "color" 
+      - "maquillaje"
+      - "moda"
+      - "estilo"
+    keywords:
+      - "perfil"
+      - "paleta"
+      - "color"
+      - "maquillaje"
+      - "ropa"
+      - "temporada"
+      - "subtono"
+      - "belleza"
+    tools:
+      - create_profile
+      - show_profile
+      - list_profiles
+      - delete_profile
+      - generate_palette
+      - quick_palette
+      - export_data
+
+  sleep_coach:
+    name: "Sleep Coaching & Analysis Server"
+    description: "Servidor de coaching personalizado de sueño y rutinas de descanso"
+    command: "python"
+    args:
+      - "Servidores/Local/sleep_coach.py"
+    env: {}
+    cwd: "."
+    enabled: true
+    priority: 2
+    categories:
+      - "sueño"
+      - "descanso"
+      - "rutinas"
+      - "salud"
+      - "bienestar"
+    keywords:
+      - "sueño"
+      - "dormir"
+      - "despertar"
+      - "insomnio"
+      - "rutina"
+      - "horario"
+      - "cronotipos"
+      - "descanso"
+    tools:
+      - create_user_profile
+      - update_user_profile
+      - analyze_sleep_pattern
+      - get_personalized_recommendations
+      - create_weekly_schedule
+      - quick_sleep_advice
+
+  game_server:
+    name: "Video Game Analysis Server" 
+    description: "Servidor de análisis de datos y estadísticas de videojuegos"
+    command: "python"
+    args:
+      - "Servidores/Local/server.py"
+    env: {}
+    cwd: "."
+    enabled: true
+    priority: 3
+    categories:
+      - "videojuegos"
+      - "gaming"
+      - "estadísticas"
+      - "entretenimiento"
+    keywords:
+      - "juego"
+      - "game"
+      - "videojuego"
+      - "consola"
+      - "plataforma"
+      - "género"
+      - "ventas"
+      - "ranking"
+      - "publisher"
+    tools:
+      - game_info
+      - count_games_by_genre
+      - best_publisher_by_sales
+      - top_games_by_sales
+      - publisher_leaderboard
+      - top_genres_by_platform
+      - top_sales_by_platform
+      - publisher_genre_breakdown
+      - top_games_by_region
+
+# Configuración de detección automática
+auto_detection:
+  enabled: true
+  check_file_existence: true
+  test_connection: true
+  fallback_on_error: true
+
+# Configuración de enrutamiento inteligente
+intelligent_routing:
+  enabled: true
+  use_keywords: true
+  use_categories: true
+  confidence_threshold: 0.7
+  fallback_to_general: true
+
+# Configuración de logging y contexto
+logging:
+  enabled: true
+  context_file: "Data/universal_context.json"
+  log_file: "Data/universal_log.txt"
+  save_interactions: true
+  max_history_entries: 1000
+
+# Configuración de interfaz de usuario
+user_interface:
+  show_server_info: true
+  show_tool_selection_reasoning: true
+  colored_output: true
+  progress_indicators: true
+  help_system: true
+
+# Configuración de Claude/Anthropic
+claude_settings:
+  model: "claude-3-5-haiku-20241022"
+  max_tokens: 1500
+  temperature: 0.3
+  tool_selection_temperature: 0.2
+  max_retries: 2
+
+# Mensajes personalizados
+messages:
+  welcome: "🌟 ¡Bienvenido al Cliente Universal MCP!"
+  goodbye: "🌟 ¡Hasta pronto! Gracias por usar el sistema universal."
+  no_servers: "❌ No se pudo conectar a ningún servidor MCP"
+  server_error: "❌ Error en servidor:"
+  tool_not_found: "🔍 No se encontró herramienta específica para tu consulta"
+  general_help: "💡 Usa 'help [área]' para ayuda específica o pregunta lo que necesites"
