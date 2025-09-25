@@ -220,8 +220,8 @@ Analiza y selecciona la herramienta correcta con argumentos apropiados."""
         result = json.loads(text)
         
         # Debug: mostrar la selección
-        print(f"📋 Debug - Herramienta seleccionada: {result.get('tool_name')}")
-        print(f"📋 Debug - Argumentos: {result.get('arguments')}")
+        print(f" Debug - Herramienta seleccionada: {result.get('tool_name')}")
+        print(f" Debug - Argumentos: {result.get('arguments')}")
         
         return result
         
@@ -425,13 +425,13 @@ async def main():
         return
     
     # Construir catálogo de herramientas
-    print("📋 Construyendo catálogo de herramientas...")
+    print(" Construyendo catálogo de herramientas...")
     tools_catalog = await server_manager.get_all_tools()
     
     print("\n¡Bienvenido al Asistente Inteligente Universal!")
     print("-" * 60)
     print("Soy tu asistente personal que puede:")
-    print("💬 Responder CUALQUIER pregunta general")
+    print(" Responder CUALQUIER pregunta general")
     
     if "beauty_server" in connected_servers:
         print("💄 Crear perfiles de belleza y generar paletas de colores")
@@ -478,7 +478,7 @@ async def main():
                             async with ClientSession(read, write) as session:
                                 await session.initialize()
                                 tools = await session.list_tools()
-                                print(f"\n📋 {server_name.upper()}:")
+                                print(f"\n {server_name.upper()}:")
                                 for tool in tools.tools:
                                     print(f"  • {tool.name}: {tool.description}")
                     except Exception as e:
@@ -513,7 +513,7 @@ async def main():
                     )
                     
                     # Debug: mostrar respuesta raw
-                    print(f"📋 Debug - Respuesta del servidor: {tool_output_text[:200]}...")
+                    print(f" Debug - Respuesta del servidor: {tool_output_text[:200]}...")
                     
                     # Verificar errores específicos
                     error_keywords = [
@@ -554,11 +554,11 @@ async def main():
             else:
                 if tool_name and server_name not in connected_servers:
                     print(f"⚠️ Servidor {server_name} no está conectado")
-                print("💬 Respondiendo como asistente general...")
+                print(" Respondiendo como asistente general...")
                 final_answer = ask_claude_basic_fallback(user_msg)
 
             print("\n" + "="*60)
-            print("📋 RESPUESTA:")
+            print(" RESPUESTA:")
             print(final_answer)
             print("="*60 + "\n")
 

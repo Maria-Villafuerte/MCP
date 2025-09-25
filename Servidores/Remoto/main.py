@@ -231,7 +231,7 @@ async def root():
         <h2>📚 Documentación</h2>
         <p><a href="/docs">📖 Swagger UI</a> | <a href="/redoc">📘 ReDoc</a></p>
         
-        <p><strong>🚀 Nuevas capacidades:</strong> Análisis científico de subtono, 8 estaciones de color, teoría de armonías avanzada</p>
+        <p><strong> Nuevas capacidades:</strong> Análisis científico de subtono, 8 estaciones de color, teoría de armonías avanzada</p>
     </body>
     </html>
     """
@@ -501,7 +501,7 @@ async def get_quote_original(category: str = None):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     
-    print("🚀 Iniciando Beauty Server Integrado...")
+    print(" Iniciando Beauty Server Integrado...")
     print(f"📍 Puerto: {port}")
     print("🌐 URL: https://beauty-pallet-server.railway.app")
     print("🔬 Funcionalidades: FastAPI + MCP Advanced")

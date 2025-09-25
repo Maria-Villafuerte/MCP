@@ -1,0 +1,17 @@
+servers:
+  filesystem_server:
+    args:
+    - C:\Users\villa\Desktop\Clases_S8\1.Redes\3.Poryecto1\MCP\Servidores\filesystem_server.py
+    command: python
+    cwd: C:\Users\villa\Desktop\Clases_S8\1.Redes\3.Poryecto1\MCP\Servidores
+    description: Servidor para operaciones del sistema de archivos
+    env: {}
+    name: Filesystem Server
+  git_server:
+    args:
+    - C:\Users\villa\Desktop\Clases_S8\1.Redes\3.Poryecto1\MCP\Servidores\git_server.py
+    command: python
+    cwd: C:\Users\villa\Desktop\Clases_S8\1.Redes\3.Poryecto1\MCP\Servidores
+    description: Servidor para operaciones Git
+    env: {}
+    name: Git Server

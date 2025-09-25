@@ -45,7 +45,7 @@ src/
 └── main.py               # Punto de entrada
 ```
 
-## 🚀 Instalación
+##  Instalación
 
 ### Prerrequisitos
 - Python 3.8 o superior

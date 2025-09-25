@@ -87,7 +87,7 @@
       "tool_used": "list_profiles",
       "arguments": {},
       "tool_output": "{\n  \"success\": true,\n  \"total_profiles\": 1,\n  \"profiles\": [\n    {\n      \"user_id\": \"MajoV\",\n      \"name\": \"MajoV\",\n      \"created_at\": \"2025-09-25T09:44:08.581364\",\n      \"skin_tone\": \"media\",\n      \"undertone\": \"frio\",\n      \"season\": \"Verano Frío\"\n    }\n  ]\n}",
-      "final_answer": "¡Claro! Aquí tienes la información de usuarios de manera clara y amigable:\n\nPerfil de Usuario Encontrado:\n👤 Nombre de Usuario: MajoV\n🕒 Fecha de Creación: 25 de septiembre de 2025\n🌈 Características Personales:\n   - Tono de Piel: Medio\n   - Subtono: Frío\n   - Temporada de Color: Verano Frío\n\nEn total, se ha encontrado 1 perfil en el sistema. ¿Necesitas más detalles sobre este usuario o tienes alguna otra consulta?"
+      "final_answer": "¡Claro! Aquí tienes la información de usuarios de manera clara y amigable:\n\nPerfil de Usuario Encontrado:\n Nombre de Usuario: MajoV\n🕒 Fecha de Creación: 25 de septiembre de 2025\n🌈 Características Personales:\n   - Tono de Piel: Medio\n   - Subtono: Frío\n   - Temporada de Color: Verano Frío\n\nEn total, se ha encontrado 1 perfil en el sistema. ¿Necesitas más detalles sobre este usuario o tienes alguna otra consulta?"
     },
     {
       "timestamp": "2025-09-25T09:56:58.579938",
