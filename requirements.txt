@@ -26,3 +26,6 @@ typing-extensions>=4.5.0
 
 # Dependencias para sleep coach
 dataclasses>=0.6.0  # Aunque es built-in en Python 3.7+, por compatibilidad
+
+rich>=13.0.0
+requests>=2.25.0

@@ -7,7 +7,7 @@ from mcp.server import Server
 from mcp.types import Tool, TextContent, ServerCapabilities, ToolsCapability
 from mcp.server.stdio import stdio_server
 
-from Tools.tools import (
+from tools import (
     init_repo,
     tool_git_list_branches,
     tool_git_commits,

@@ -10,3 +10,7 @@ venv
 ./venv
 /venv
 venv
+
+myenv
+/myenv
+./myenv

@@ -7,7 +7,7 @@ from mcp.server import Server
 from mcp.types import Tool, TextContent, ServerCapabilities, ToolsCapability
 from mcp.server.stdio import stdio_server
 
-from Tools.tools import (
+from tools import (
     tool_fs_list_dir,
     tool_fs_read_file,
     tool_fs_write_file,
