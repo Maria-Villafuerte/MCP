@@ -1,0 +1,188 @@
+{
+  "profiles": {
+    "MajoV": {
+      "basic_info": {
+        "user_id": "MajoV",
+        "name": "MajoV",
+        "created_at": "2025-09-25T09:44:08.581364"
+      },
+      "physical_characteristics": {
+        "skin_tone": "media",
+        "vein_color": "azul",
+        "eye_color": "cafe",
+        "hair_color": "castano_oscuro",
+        "natural_lip_color": "durazno",
+        "contrast_level": "medio"
+      },
+      "preferences": {
+        "jewelry_preference": "oro",
+        "sun_reaction": "broncea_despacio",
+        "style_preference": "moderno"
+      },
+      "color_analysis": {
+        "undertone_analysis": {
+          "undertone": "frio",
+          "score": -2.5,
+          "confidence": 50.0,
+          "analysis": "Puntuación: -2.5 - FRIO"
+        },
+        "season_analysis": {
+          "season": "verano_frio",
+          "season_info": {
+            "name": "Verano Frío",
+            "characteristics": "Colores frescos, suaves con base azul",
+            "temperature": "frio",
+            "saturation": "media",
+            "contrast": "medio",
+            "best_colors": [
+              "#4169E1",
+              "#9370DB",
+              "#FF69B4",
+              "#20B2AA",
+              "#BA55D3",
+              "#7B68EE"
+            ],
+            "avoid_colors": [
+              "#FF8C00",
+              "#FF6347",
+              "#DAA520",
+              "#CD853F"
+            ]
+          },
+          "confidence": 85,
+          "reasoning": "Piel media + subtono frio + contraste medio = Verano Frío"
+        },
+        "recommended_colors": [
+          "#4169E1",
+          "#9370DB",
+          "#FF69B4",
+          "#20B2AA",
+          "#BA55D3",
+          "#7B68EE"
+        ],
+        "colors_to_avoid": [
+          "#FF8C00",
+          "#FF6347",
+          "#DAA520",
+          "#CD853F"
+        ]
+      }
+    }
+  },
+  "palettes": {
+    "test_advanced": [
+      {
+        "user_id": "test_advanced",
+        "palette_type": "maquillaje",
+        "event_type": "formal",
+        "generated_at": "2025-09-25T09:27:00.393888",
+        "base_season": "Verano Suave",
+        "main_palette": {
+          "ojos": {
+            "sombras_principales": [
+              "#B0C4DE",
+              "#D8BFD8"
+            ],
+            "sombra_iluminadora": "#F0F8FF",
+            "delineador": "#8B4513"
+          },
+          "rostro": {
+            "base": "#F0F0F0",
+            "rubor": "#D8BFD8",
+            "iluminador": "#c7d5e7"
+          },
+          "labios": {
+            "color_principal": "#F5F5DC",
+            "alternativo": "#FAFAFA"
+          },
+          "recomendaciones": {
+            "intensidad": "elegante",
+            "ocasion": "formal",
+            "tecnica": "Maquillaje suave, técnica de difuminado natural"
+          }
+        },
+        "harmony_colors": [
+          "#fcfaf7",
+          "#688ebf",
+          "#decab0",
+          "#bf9968",
+          "#B0C4DE",
+          "#f7f9fc"
+        ],
+        "color_theory": {
+          "temperature": "frio",
+          "saturation": "baja",
+          "contrast": "bajo",
+          "explanation": "Colores apagados, frescos y suaves"
+        }
+      }
+    ],
+    "MajoV": [
+      {
+        "user_id": "MajoV",
+        "palette_type": "ropa",
+        "event_type": "trabajo",
+        "generated_at": "2025-09-25T09:46:40.333833",
+        "base_season": "Verano Frío",
+        "main_palette": {
+          "colores_principales": [
+            "#4169E1",
+            "#9370DB",
+            "#FF69B4"
+          ],
+          "colores_neutros": [
+            "#F8F8FF",
+            "#E6E6FA",
+            "#D3D3D3"
+          ],
+          "colores_accent": [
+            "#20B2AA",
+            "#BA55D3",
+            "#7B68EE"
+          ],
+          "combinaciones_recomendadas": [
+            {
+              "superior": "#4169E1",
+              "inferior": "#9370DB",
+              "descripcion": "Combinación armónica principal"
+            },
+            {
+              "superior": "#9370DB",
+              "inferior": "#4169E1",
+              "descripcion": "Combinación armónica invertida"
+            },
+            {
+              "superior": "#4169E1",
+              "inferior": "#FF69B4",
+              "descripcion": "Combinación con contraste"
+            }
+          ],
+          "texturas_recomendadas": [
+            "Chiffon",
+            "Organza",
+            "Algodón suave"
+          ],
+          "estilos": {
+            "ocasion": "trabajo",
+            "temperatura_color": "frio",
+            "saturacion": "media"
+          }
+        },
+        "harmony_colors": [
+          "#eed998",
+          "#99aeee",
+          "#4169E1",
+          "#193ba2",
+          "#a17f19",
+          "#e1b940"
+        ],
+        "color_theory": {
+          "temperature": "frio",
+          "saturation": "media",
+          "contrast": "medio",
+          "explanation": "Colores frescos, suaves con base azul"
+        }
+      }
+    ]
+  }
+}
