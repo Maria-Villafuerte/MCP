@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 """
-Cliente Universal MCP Multi-Servidor
-Conecta y utiliza múltiples servidores MCP simultáneamente:
-- Beauty Server (análisis de belleza y color)
-- Sleep Coach (recomendaciones de sueño)
-- Game Server (análisis de videojuegos)
+Cliente Universal MCP Multi-Servidor - BASADO EN BEAUTY_CLIENT EXITOSO
+Funciona igual que beauty_client pero con múltiples servidores MCP
 """
 
 import os
 import json
 import yaml
 import asyncio
-import re
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List
 from datetime import datetime
 from pathlib import Path
 
@@ -29,8 +25,8 @@ from mcp.client.session import ClientSession
 CURRENT_DIR = Path(__file__).parent.absolute()
 PROJECT_ROOT = CURRENT_DIR.parent.absolute()
 
-print(f"🏠 Directorio actual: {CURRENT_DIR}")
-print(f"🌍 Raíz del proyecto: {PROJECT_ROOT}")
+print(f"📂 Directorio actual: {CURRENT_DIR}")
+print(f"🌐 Raíz del proyecto: {PROJECT_ROOT}")
 
 # Configuración de archivos
 CONFIG_FILE = PROJECT_ROOT / "universal_servers.yaml"
@@ -68,135 +64,7 @@ client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 # Crear directorios necesarios
 DATA_DIR.mkdir(exist_ok=True)
 
-class MultiServerManager:
-    """Manager para múltiples conexiones MCP"""
-    
-    def __init__(self):
-        self.servers = {}  # server_name -> session info
-        self.tools_catalog = {}  # server_name -> tools
-        self.server_configs = {}
-        self.active_connections = {}
-        
-    async def initialize_servers(self):
-        """Inicializar todos los servidores disponibles"""
-        # Configuración de servidores
-        server_configs = {
-            "beauty_server": {
-                "command": "python",
-                "args": [str(PROJECT_ROOT / "Servidores" / "Local" / "beauty_server.py")],
-                "env": {},
-                "cwd": str(PROJECT_ROOT),
-                "description": "Servidor de análisis de belleza y colorimetría"
-            },
-            "sleep_coach": {
-                "command": "python", 
-                "args": [str(PROJECT_ROOT / "Servidores" / "Externos" / "Fabi" / "sleep_coach.py")],
-                "env": {},
-                "cwd": str(PROJECT_ROOT),
-                "description": "Servidor de coaching de sueño personalizado"
-            },
-            "game_server": {
-                "command": "python",
-                "args": [str(PROJECT_ROOT / "Servidores"  / "Externos" / "JP" / "server.py")], 
-                "env": {},
-                "cwd": str(PROJECT_ROOT),
-                "description": "Servidor de análisis de videojuegos"
-            }
-        }
-        
-        self.server_configs = server_configs
-        
-        # Intentar conectar a cada servidor
-        connected_servers = []
-        for server_name, config in server_configs.items():
-            try:
-                success = await self._test_server_connection(server_name, config)
-                if success:
-                    connected_servers.append(server_name)
-                    print(f"✅ {server_name}: {config['description']}")
-                else:
-                    print(f"❌ {server_name}: No disponible")
-            except Exception as e:
-                print(f"❌ {server_name}: Error - {str(e)}")
-        
-        if not connected_servers:
-            raise Exception("No se pudo conectar a ningún servidor MCP")
-            
-        print(f"\n🌟 Servidores conectados: {len(connected_servers)}")
-        return connected_servers
-    
-    async def _test_server_connection(self, server_name: str, config: Dict[str, Any]) -> bool:
-        """Probar conexión a un servidor específico"""
-        try:
-            # Verificar que los archivos existan
-            server_file = Path(config["args"][0])
-            if not server_file.exists():
-                return False
-            
-            server_params = StdioServerParameters(
-                command=config["command"],
-                args=config["args"],
-                env=config.get("env", {})
-            )
-            
-            # Prueba rápida de conexión
-            async with stdio_client(server_params) as (read, write):
-                async with ClientSession(read, write) as session:
-                    await session.initialize()
-                    tools = await session.list_tools()
-                    
-                    # Guardar información del servidor
-                    self.servers[server_name] = {
-                        "config": config,
-                        "params": server_params,
-                        "status": "available"
-                    }
-                    self.tools_catalog[server_name] = tools.tools
-                    
-                    return True
-        except Exception:
-            return False
-    
-    async def call_tool_on_server(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> str:
-        """Ejecutar herramienta en servidor específico"""
-        if server_name not in self.servers:
-            return f"Error: Servidor {server_name} no disponible"
-        
-        try:
-            server_params = self.servers[server_name]["params"]
-            
-            async with stdio_client(server_params) as (read, write):
-                async with ClientSession(read, write) as session:
-                    await session.initialize()
-                    result = await session.call_tool(name=tool_name, arguments=arguments)
-                    return "\n".join([c.text for c in result.content if c.type == "text"])
-                    
-        except Exception as e:
-            return f"Error ejecutando {tool_name} en {server_name}: {str(e)}"
-    
-    def get_all_tools(self) -> Dict[str, List]:
-        """Obtener todas las herramientas de todos los servidores"""
-        all_tools = {}
-        for server_name, tools in self.tools_catalog.items():
-            all_tools[server_name] = [
-                {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "server": server_name
-                }
-                for tool in tools
-            ]
-        return all_tools
-    
-    def find_server_for_tool(self, tool_name: str) -> Optional[str]:
-        """Encontrar qué servidor tiene una herramienta específica"""
-        for server_name, tools in self.tools_catalog.items():
-            for tool in tools:
-                if tool.name == tool_name:
-                    return server_name
-        return None
-
-# Funciones de contexto
+# Inicializar contexto
 def init_context():
     """Inicializar archivo de contexto"""
     if not CONTEXT_FILE.exists():
@@ -214,16 +82,19 @@ def init_context():
 
 def save_to_context(entry: Dict[str, Any]):
     """Guardar entrada en el contexto"""
-    with open(CONTEXT_FILE, "r+", encoding="utf-8") as f:
-        data = json.load(f)
-        data["history"].append(entry)
-        if entry.get("tool_used") and entry.get("arguments"):
-            data["last_tool_memory"][entry["tool_used"]] = entry["arguments"]
-        data["session_info"]["last_active"] = datetime.now().isoformat()
-        data["session_info"]["total_interactions"] += 1
-        f.seek(0)
-        json.dump(data, f, ensure_ascii=False, indent=2)
-        f.truncate()
+    try:
+        with open(CONTEXT_FILE, "r+", encoding="utf-8") as f:
+            data = json.load(f)
+            data["history"].append(entry)
+            if entry.get("tool_used") and entry.get("arguments"):
+                data["last_tool_memory"][entry["tool_used"]] = entry["arguments"]
+            data["session_info"]["last_active"] = datetime.now().isoformat()
+            data["session_info"]["total_interactions"] += 1
+            f.seek(0)
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.truncate()
+    except Exception as e:
+        print(f"Error guardando contexto: {e}")
 
 def get_last_args_for_tool(tool_name: Optional[str]) -> Optional[Dict[str, Any]]:
     """Obtener últimos argumentos usados para una herramienta"""
@@ -236,76 +107,142 @@ def get_last_args_for_tool(tool_name: Optional[str]) -> Optional[Dict[str, Any]]
     except FileNotFoundError:
         return None
 
-# Prompts del sistema
-TOOL_SELECTION_SYSTEM = """Eres un asistente especializado que puede usar múltiples servidores MCP:
+def log_interaction(entry: Dict[str, Any]):
+    """Registrar interacción en archivo de log"""
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
-SERVIDORES DISPONIBLES:
-- beauty_server: Análisis de belleza, colorimetría, paletas de color, perfiles personales
-- sleep_coach: Coaching de sueño, análisis de patrones, recomendaciones personalizadas
-- game_server: Análisis de videojuegos, estadísticas, rankings
+# Variable global para historial de conversación
+conversation_history: List[Dict[str, str]] = []
+
+# CONFIGURACIÓN DE SERVIDORES
+def create_default_config():
+    """Crear configuración por defecto si no existe"""
+    default_config = {
+        "servers": {
+            "beauty_server": {
+                "name": "Beauty & Color Analysis Server",
+                "description": "Servidor de análisis de belleza y colorimetría",
+                "command": "python",
+                "args": [str(PROJECT_ROOT / "Servidores" / "Local" / "beauty_server.py")],
+                "enabled": True,
+                "cwd": str(PROJECT_ROOT)
+            },
+            "sleep_coach": {
+                "name": "Sleep Coaching Server", 
+                "description": "Servidor de coaching de sueño",
+                "command": "python",
+                "args": [str(PROJECT_ROOT / "Servidores" / "Externos" / "Fabi" / "sleep_coach.py")],
+                "enabled": True,
+                "cwd": str(PROJECT_ROOT)
+            },
+            "game_server": {
+                "name": "Video Game Analysis Server",
+                "description": "Servidor de análisis de videojuegos", 
+                "command": "python",
+                "args": [str(PROJECT_ROOT / "Servidores" / "Externos" / "JP" / "server.py")],
+                "enabled": True,
+                "cwd": str(PROJECT_ROOT)
+            }
+        }
+    }
+    
+    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+        yaml.dump(default_config, f, default_flow_style=False, allow_unicode=True)
+    
+    print(f"📄 Configuración por defecto creada en: {CONFIG_FILE}")
+
+# SISTEMA DE SELECCIÓN DE HERRAMIENTAS MEJORADO
+TOOL_SELECTION_SYSTEM = """Eres un asistente especializado con acceso a múltiples servidores MCP:
+
+ESTRATEGIA INTELIGENTE POR SERVIDOR:
+
+🎮 GAME_SERVER - Usa géneros exactos:
+- Para RPG: usa "Role-Playing" (no "RPG") 
+- Para contar géneros: count_games_by_genre con {} (sin argumentos)
+- Para mejores juegos: top_games_by_sales con {"genre": "Role-Playing", "limit": 10}
+- Para publishers: publisher_leaderboard con {"limit": 10}
+
+😴 SLEEP_COACH - Usa herramientas simples:
+- Para consultas generales: quick_sleep_advice con {"query": "texto_literal_del_usuario"}
+- NO uses create_user_profile (requiere muchos datos)
+
+💄 BEAUTY_SERVER - Usa herramientas correctas según la información:
+- Para paletas SIN perfil: quick_palette con {"palette_type": "ropa|maquillaje|accesorios", "event_type": "trabajo|casual|formal"}
+- Para crear perfil: SOLO si el usuario proporciona TODOS los datos necesarios (user_id, name, skin_tone, vein_color, jewelry_preference, sun_reaction, eye_color, hair_color, natural_lip_color, contrast_level)
+- Para listar perfiles: list_profiles con {}
+- Para mostrar perfil: show_profile con {"user_id": "id"}
+
+REGLAS CRÍTICAS:
+- NUNCA uses create_profile sin TODOS los argumentos requeridos
+- Para "crear perfil" sin datos específicos, usa quick_palette en su lugar
+- Para sueño usa quick_sleep_advice, no create_user_profile
+- Para videojuegos usa géneros exactos como "Role-Playing"
 
 HERRAMIENTAS DISPONIBLES:
 {tools_catalog}
 
-REGLAS:
-- Analiza la consulta del usuario y selecciona la herramienta más apropiada
-- Si es sobre belleza/color/maquillaje/ropa -> beauty_server
-- Si es sobre sueño/descanso/rutinas/cronotipos -> sleep_coach  
-- Si es sobre videojuegos/juegos/rankings/géneros -> game_server
-- Si NO coincide con ninguna herramienta específica, usa "tool_name": null
-- Si necesitas más información, pregunta al usuario
+Responde SOLO con JSON válido:
+{{ "tool_name": string|null, "server_name": string|null, "arguments": object, "reasoning_summary": string }}"""
 
-Responde SOLO con JSON:
-{ "tool_name": string|null, "server_name": string|null, "arguments": object, "reasoning_summary": string }"""
+def ask_claude_for_tool(user_message: str, tools_catalog: str) -> Dict[str, Any]:
+    """Preguntar a Claude qué herramienta usar - MEJORADO CON ESTRATEGIAS INTELIGENTES"""
+    prompt = f"""Herramientas disponibles por servidor:
+{tools_catalog}
 
-conversation_history: List[Dict[str, str]] = []
+Mensaje del usuario: {user_message}
 
-def ask_claude_for_tool(user_message: str, all_tools: Dict[str, List]) -> Dict[str, Any]:
-    """Preguntar a Claude qué herramienta usar y en qué servidor"""
-    # Construir catálogo de herramientas
-    tools_catalog = ""
-    for server_name, tools in all_tools.items():
-        tools_catalog += f"\n{server_name.upper()}:\n"
-        for tool in tools:
-            tools_catalog += f"  - {tool['name']}: {tool['description']}\n"
-    
-    formatted_system = TOOL_SELECTION_SYSTEM.format(tools_catalog=tools_catalog)
-    
-    prompt = f"""Mensaje del usuario: {user_message}
+ESTRATEGIAS ESPECÍFICAS OBLIGATORIAS:
+1. Para belleza/paletas SIN datos específicos del usuario: USA quick_palette
+2. Para sueño SIN datos específicos: USA quick_sleep_advice  
+3. Para videojuegos: USA géneros exactos ("Role-Playing" no "RPG")
+4. NUNCA uses create_profile o create_user_profile sin datos completos
 
-Analiza el mensaje y selecciona la herramienta más apropiada y el servidor correcto."""
+Analiza y selecciona la herramienta correcta con argumentos apropiados."""
     
-    response = client.messages.create(
-        model=ANTHROPIC_MODEL,
-        max_tokens=1000,
-        temperature=0.2,
-        system=formatted_system,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    
-    text = response.content[0].text.strip()
     try:
-        return json.loads(text)
-    except:
-        return {
-            "tool_name": None,
-            "server_name": None, 
-            "arguments": {},
-            "reasoning_summary": "No se pudo parsear respuesta."
-        }
+        response = client.messages.create(
+            model=ANTHROPIC_MODEL,
+            max_tokens=1000,
+            temperature=0.1,  # Más determinista
+            system=TOOL_SELECTION_SYSTEM,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        text = response.content[0].text.strip()
+        
+        # Limpiar respuesta si viene envuelta en markdown
+        if text.startswith("```json"):
+            text = text.replace("```json", "").replace("```", "").strip()
+        if text.startswith("```"):
+            text = text.replace("```", "").strip()
+        
+        result = json.loads(text)
+        
+        # Debug: mostrar la selección
+        print(f"📋 Debug - Herramienta seleccionada: {result.get('tool_name')}")
+        print(f"📋 Debug - Argumentos: {result.get('arguments')}")
+        
+        return result
+        
+    except json.JSONDecodeError as e:
+        print(f"❌ Debug - JSON Error: {e}")
+        print(f"❌ Debug - Raw text: {text if 'text' in locals() else 'No text'}")
+        return {"tool_name": None, "server_name": None, "arguments": {}, "reasoning_summary": "Error parseando JSON del modelo."}
+    except Exception as e:
+        print(f"❌ Debug - General Error: {e}")
+        return {"tool_name": None, "server_name": None, "arguments": {}, "reasoning_summary": "Error general en selección de herramienta."}
 
 def ask_claude_for_final_answer(tool_output_text: str, user_message: str, server_name: str) -> str:
-    """Generar respuesta final amigable"""
-    system_message = f"""Eres un asistente experto que usa múltiples servidores especializados para ayudar al usuario.
-
-El resultado viene del servidor: {server_name.upper()}
+    """Generar respuesta final amigable - IGUAL QUE BEAUTY_CLIENT"""
+    system_message = f"""Eres un experto con acceso a múltiples servidores especializados. La información viene del servidor {server_name}.
 
 DIRECTRICES:
 - Usa un tono cálido y profesional
-- Convierte la información técnica en respuestas naturales y útiles
-- Da contexto sobre qué tipo de análisis se realizó
-- Usa la información EXACTAMENTE como viene
-- Menciona sutilmente que la respuesta proviene del servidor {server_name}"""
+- Convierte la salida técnica en respuestas naturales y útiles
+- Da consejos prácticos cuando sea relevante
+- Usa la información EXACTAMENTE como viene de la herramienta
+- Menciona sutilmente el análisis especializado cuando sea relevante"""
     
     prompt = f"""Mensaje del usuario: {user_message}
 
@@ -314,47 +251,160 @@ Salida del servidor {server_name}:
 
 Convierte esta información en una respuesta natural y útil."""
     
-    response = client.messages.create(
-        model=ANTHROPIC_MODEL,
-        max_tokens=1500,
-        temperature=0.3,
-        system=system_message,
-        messages=[{"role": "user", "content": prompt}]
-    )
+    try:
+        response = client.messages.create(
+            model=ANTHROPIC_MODEL,
+            max_tokens=1500,
+            temperature=0.3,
+            system=system_message,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        return response.content[0].text.strip()
+    except Exception as e:
+        return f"Error generando respuesta final: {e}"
+
+def ask_claude_basic_fallback(user_message: str) -> str:
+    """Respuesta general - IGUAL QUE BEAUTY_CLIENT"""
+    global conversation_history
     
-    return response.content[0].text.strip()
+    system_message = """Eres un asistente inteligente que puede responder cualquier pregunta de manera precisa y útil. Respondes de forma natural y completa, sin limitaciones de tema.
 
-def ask_claude_general_fallback(user_message: str) -> str:
-    """Respuesta general cuando no hay herramienta específica"""
-    system_message = """Eres un asistente inteligente con acceso a servidores especializados en:
-- Belleza y colorimetría (análisis de color personal, maquillaje, moda)
-- Coaching de sueño (rutinas, análisis de patrones, recomendaciones)  
-- Análisis de videojuegos (estadísticas, rankings, datos)
+Si la pregunta NO es sobre temas especializados (belleza, sueño, videojuegos), responde normalmente como un asistente general.
+Si la pregunta SÍ es sobre temas especializados pero no tienes herramientas específicas, ofrece consejos generales.
 
-Si la pregunta no es específica de estas áreas, responde como asistente general.
-Si es de estas áreas pero necesitas más información, guía al usuario sobre qué puede hacer."""
+Siempre sé útil, preciso y conversacional."""
+    
+    # Asegurar que conversation_history esté inicializada
+    if conversation_history is None:
+        conversation_history = []
     
     messages = conversation_history + [
         {"role": "user", "content": user_message}
     ]
     
-    response = client.messages.create(
-        model=ANTHROPIC_MODEL,
-        max_tokens=1500,
-        temperature=0.3,
-        system=system_message,
-        messages=messages
-    )
-    
-    reply = response.content[0].text.strip()
-    conversation_history.append({"role": "user", "content": user_message})
-    conversation_history.append({"role": "assistant", "content": reply})
-    return reply
+    try:
+        response = client.messages.create(
+            model=ANTHROPIC_MODEL,
+            max_tokens=1500,
+            temperature=0.3,
+            system=system_message,
+            messages=messages
+        )
+        
+        reply = response.content[0].text.strip()
+        conversation_history.append({"role": "user", "content": user_message})
+        conversation_history.append({"role": "assistant", "content": reply})
+        
+        # Limitar historial para evitar que crezca demasiado
+        if len(conversation_history) > 10:
+            conversation_history = conversation_history[-10:]
+            
+        return reply
+    except Exception as e:
+        return f"Error en respuesta general: {e}"
 
-# Función principal
+class MultiServerManager:
+    """Manager para múltiples conexiones MCP - BASADO EN BEAUTY_CLIENT"""
+    
+    def __init__(self):
+        self.servers = {}
+        self.server_configs = {}
+        self.connected_servers = []
+        
+    async def initialize_servers(self) -> List[str]:
+        """Inicializar todos los servidores disponibles"""
+        if not CONFIG_FILE.exists():
+            create_default_config()
+        
+        # Cargar configuración
+        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+        
+        self.server_configs = config.get("servers", {})
+        connected = []
+        
+        for server_name, server_config in self.server_configs.items():
+            if not server_config.get("enabled", True):
+                continue
+            
+            try:
+                # Verificar que el archivo del servidor existe
+                server_file = Path(server_config["args"][0])
+                if not server_file.exists():
+                    print(f"❌ {server_name}: Archivo no encontrado - {server_file}")
+                    continue
+                
+                # Probar conexión
+                server_params = StdioServerParameters(
+                    command=server_config["command"],
+                    args=server_config["args"],
+                    env=server_config.get("env", {}),
+                    cwd=server_config.get("cwd", str(PROJECT_ROOT))
+                )
+                
+                # Test de conexión rápido
+                async with stdio_client(server_params) as (read, write):
+                    async with ClientSession(read, write) as session:
+                        await asyncio.wait_for(session.initialize(), timeout=10.0)
+                        
+                        self.servers[server_name] = {
+                            "params": server_params,
+                            "config": server_config
+                        }
+                        connected.append(server_name)
+                        print(f"✅ {server_name}: {server_config.get('description', 'Sin descripción')}")
+                        
+            except Exception as e:
+                print(f"❌ {server_name}: Error - {str(e)}")
+        
+        self.connected_servers = connected
+        return connected
+    
+    async def get_all_tools(self) -> str:
+        """Obtener catálogo de todas las herramientas - IGUAL QUE BEAUTY_CLIENT"""
+        tools_catalog = []
+        
+        for server_name in self.connected_servers:
+            try:
+                server_params = self.servers[server_name]["params"]
+                
+                async with stdio_client(server_params) as (read, write):
+                    async with ClientSession(read, write) as session:
+                        await session.initialize()
+                        tools = await session.list_tools()
+                        
+                        tools_catalog.append(f"SERVIDOR: {server_name}")
+                        for tool in tools.tools:
+                            tools_catalog.append(f"- {tool.name}: {tool.description}")
+                        tools_catalog.append("")
+                        
+            except Exception as e:
+                print(f"Error obteniendo herramientas de {server_name}: {e}")
+        
+        return "\n".join(tools_catalog)
+    
+    async def call_tool_on_server(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> str:
+        """Ejecutar herramienta en servidor específico - IGUAL QUE BEAUTY_CLIENT"""
+        if server_name not in self.servers:
+            return f"Error: Servidor {server_name} no disponible"
+        
+        try:
+            server_params = self.servers[server_name]["params"]
+            
+            async with stdio_client(server_params) as (read, write):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    result = await session.call_tool(name=tool_name, arguments=arguments)
+                    return "\n".join([c.text for c in result.content if c.type == "text"])
+                    
+        except Exception as e:
+            return f"Error ejecutando {tool_name} en {server_name}: {str(e)}"
+
+# Función principal - ESTRUCTURA IGUAL QUE BEAUTY_CLIENT
 async def main():
     """Función principal del cliente universal"""
-    print("🌟 CLIENTE UNIVERSAL MCP - MULTI-SERVIDOR")
+    print("🌟 ASISTENTE INTELIGENTE UNIVERSAL")
     print("=" * 60)
     
     # Inicializar contexto
@@ -363,117 +413,84 @@ async def main():
     # Inicializar manager de servidores
     server_manager = MultiServerManager()
     
-    print("🔍 Detectando servidores disponibles...")
+    print("🔍 Conectando a servidores especializados...")
     try:
         connected_servers = await server_manager.initialize_servers()
     except Exception as e:
         print(f"❌ Error inicializando servidores: {e}")
         return
     
-    # Obtener catálogo completo de herramientas
-    all_tools = server_manager.get_all_tools()
-    total_tools = sum(len(tools) for tools in all_tools.values())
+    if not connected_servers:
+        print("❌ No se pudo conectar a ningún servidor MCP")
+        return
     
-    print("\n🎯 ¡SISTEMA UNIVERSAL ACTIVO!")
+    # Construir catálogo de herramientas
+    print("📋 Construyendo catálogo de herramientas...")
+    tools_catalog = await server_manager.get_all_tools()
+    
+    print("\n¡Bienvenido al Asistente Inteligente Universal!")
     print("-" * 60)
-    print("Capacidades disponibles:")
-    print("💄 BELLEZA: Análisis de color, paletas personalizadas, consejos de moda")
-    print("😴 SUEÑO: Rutinas personalizadas, análisis de patrones, mejora del descanso") 
-    print("🎮 VIDEOJUEGOS: Estadísticas, rankings, análisis de datos")
-    print("🤖 GENERAL: Responder cualquier pregunta como asistente inteligente")
+    print("Soy tu asistente personal que puede:")
+    print("💬 Responder CUALQUIER pregunta general")
+    
+    if "beauty_server" in connected_servers:
+        print("💄 Crear perfiles de belleza y generar paletas de colores")
+    if "sleep_coach" in connected_servers:
+        print("😴 Ayudarte con rutinas de sueño y análisis de patrones")
+    if "game_server" in connected_servers:
+        print("🎮 Analizar videojuegos y estadísticas de gaming")
+    
     print("")
-    print("Comandos especiales:")
-    print("  'servers' - Ver servidores conectados")
-    print("  'tools' - Ver todas las herramientas disponibles")
-    print("  'help [área]' - Ayuda específica (belleza/sueño/juegos)")
-    print("  'exit' - Salir")
+    print("Ejemplos de lo que puedo hacer:")
+    print("  GENERAL: '¿Quién es Isaac Newton?', '¿Cómo funciona la fotosíntesis?'")
+    if "beauty_server" in connected_servers:
+        print("  BELLEZA: 'Crear perfil de usuario', 'Generar paleta de maquillaje'")
+    if "sleep_coach" in connected_servers:
+        print("  SUEÑO: 'Tengo insomnio', 'Crear rutina de sueño'")
+    if "game_server" in connected_servers:
+        print("  JUEGOS: 'Mejores juegos de RPG', 'Estadísticas de Nintendo'")
+    print("  CONVERSACIÓN: '¿Qué tal tu día?', 'Cuéntame un chiste'")
     print("-" * 60)
-    print(f"✅ {len(connected_servers)} servidores | {total_tools} herramientas disponibles")
+    print("Comandos especiales: 'tools' (ver herramientas), 'exit' (salir)")
+    print()
+    print(f"✅ Sistema conectado a {len(connected_servers)} servidores especializados")
     print()
     
     ps = PromptSession()
     
     while True:
         try:
-            user_msg = (await ps.prompt_async("[UNIVERSAL] > ")).strip()
+            user_msg = (await ps.prompt_async("> ")).strip()
             
             if not user_msg:
                 continue
                 
             if user_msg.lower() in ("exit", "quit", "salir"):
-                print("\n🌟 ¡Hasta pronto! Gracias por usar el sistema universal.")
+                print("🌟 ¡Hasta pronto! Espero haberte ayudado.")
                 break
-            
-            if user_msg.lower() == "servers":
-                print("\n📡 SERVIDORES CONECTADOS:")
-                for server_name, server_info in server_manager.servers.items():
-                    config = server_info["config"]
-                    print(f"  ✅ {server_name}: {config['description']}")
-                print()
-                continue
-            
+                
             if user_msg.lower() == "tools":
                 print("\n🛠️ HERRAMIENTAS DISPONIBLES:")
-                for server_name, tools in all_tools.items():
-                    print(f"\n📋 {server_name.upper()} ({len(tools)} herramientas):")
-                    for tool in tools:
-                        print(f"  • {tool['name']}: {tool['description']}")
+                for server_name in connected_servers:
+                    try:
+                        server_params = server_manager.servers[server_name]["params"]
+                        async with stdio_client(server_params) as (read, write):
+                            async with ClientSession(read, write) as session:
+                                await session.initialize()
+                                tools = await session.list_tools()
+                                print(f"\n📋 {server_name.upper()}:")
+                                for tool in tools.tools:
+                                    print(f"  • {tool.name}: {tool.description}")
+                    except Exception as e:
+                        print(f"  Error listando herramientas de {server_name}: {e}")
                 print()
                 continue
-                
-            if user_msg.lower().startswith("help"):
-                parts = user_msg.split()
-                area = parts[1] if len(parts) > 1 else None
-                
-                if area == "belleza":
-                    print("""
-💄 AYUDA - ANÁLISIS DE BELLEZA:
-  • "crear perfil [nombre]" - Crear análisis de color personal
-  • "mostrar perfil [usuario]" - Ver análisis existente  
-  • "generar paleta de ropa para trabajo" - Paletas personalizadas
-  • "paleta rápida de maquillaje" - Paletas sin perfil
-  • "listar usuarios" - Ver todos los perfiles
-                    """)
-                elif area == "sueño":
-                    print("""
-😴 AYUDA - COACHING DE SUEÑO:
-  • "crear perfil de sueño [nombre]" - Análisis personalizado
-  • "analizar mi patrón de sueño" - Detectar problemas
-  • "recomendaciones personalizadas" - Consejos específicos
-  • "horario semanal optimizado" - Rutinas completas
-  • "consejo rápido sobre insomnio" - Ayuda inmediata
-                    """)
-                elif area == "juegos":
-                    print("""
-🎮 AYUDA - ANÁLISIS DE VIDEOJUEGOS:
-  • "información del juego [nombre]" - Datos completos
-  • "mejores juegos de RPG" - Rankings por género
-  • "top ventas Nintendo DS" - Mejores por plataforma  
-  • "publisher con más ventas" - Análisis de editores
-  • "juegos más vendidos en Japón" - Datos por región
-                    """)
-                else:
-                    print("""
-🌟 AYUDA GENERAL:
-  Puedo ayudarte con:
-  • Preguntas generales sobre cualquier tema
-  • Análisis especializado de belleza y color
-  • Coaching personalizado de sueño y rutinas
-  • Estadísticas y análisis de videojuegos
-  
-  Usa 'help [área]' para ayuda específica:
-  • help belleza
-  • help sueño  
-  • help juegos
-                    """)
-                continue
             
-            # Procesar solicitud normal
-            print("🔍 Analizando solicitud...")
-            
-            selection = ask_claude_for_tool(user_msg, all_tools)
+            # Seleccionar herramienta con Claude - IGUAL QUE BEAUTY_CLIENT
+            print("🔍 Analizando tu solicitud...")
+            selection = ask_claude_for_tool(user_msg, tools_catalog)
             tool_name = selection.get("tool_name")
-            server_name = selection.get("server_name") 
+            server_name = selection.get("server_name")
             tool_args = selection.get("arguments", {}) or {}
             
             # Usar argumentos previos si están vacíos
@@ -481,26 +498,64 @@ async def main():
             if tool_name and last_args and not tool_args:
                 tool_args = last_args
 
-            print(f"🎯 Herramienta: {tool_name or 'ninguna'}")
-            print(f"🖥️ Servidor: {server_name or 'ninguno'}")  
+            print(f"🎯 Herramienta seleccionada: {tool_name or 'ninguna'}")
+            if server_name:
+                print(f"🖥️ Servidor: {server_name}")
             print(f"💭 Razonamiento: {selection.get('reasoning_summary', 'N/A')}")
             
             tool_output_text = ""
             
-            if tool_name and server_name and server_name in server_manager.servers:
+            if tool_name and server_name and server_name in connected_servers:
                 try:
-                    print(f"⚡ Ejecutando en {server_name}...")
+                    print("⚡ Ejecutando herramienta especializada...")
                     tool_output_text = await server_manager.call_tool_on_server(
                         server_name, tool_name, tool_args
                     )
                     
-                    print("✨ Generando respuesta personalizada...")
-                    final_answer = ask_claude_for_final_answer(tool_output_text, user_msg, server_name)
+                    # Debug: mostrar respuesta raw
+                    print(f"📋 Debug - Respuesta del servidor: {tool_output_text[:200]}...")
+                    
+                    # Verificar errores específicos
+                    error_keywords = [
+                        "validation error", "required property", "missing", "not found",
+                        "campo requerido", "error ejecutando", "input validation error"
+                    ]
+                    
+                    has_error = any(keyword in tool_output_text.lower() for keyword in error_keywords)
+                    
+                    if has_error:
+                        print(f"⚠️ Error específico detectado en la herramienta {tool_name}")
+                        print(f"⚠️ Error: {tool_output_text[:300]}")
+                        
+                        # Si es un error de create_profile, sugerir quick_palette
+                        if tool_name == "create_profile":
+                            print("🔄 Intentando con quick_palette en su lugar...")
+                            fallback_args = {"palette_type": "ropa", "event_type": "casual"}
+                            tool_output_text = await server_manager.call_tool_on_server(
+                                server_name, "quick_palette", fallback_args
+                            )
+                            if not any(keyword in tool_output_text.lower() for keyword in error_keywords):
+                                print("✅ Éxito con quick_palette")
+                                final_answer = ask_claude_for_final_answer(tool_output_text, user_msg, server_name)
+                            else:
+                                print("⚠️ También falló quick_palette, usando respuesta general...")
+                                final_answer = ask_claude_basic_fallback(user_msg)
+                        else:
+                            print("⚠️ Cambiando a respuesta general...")
+                            final_answer = ask_claude_basic_fallback(user_msg)
+                    else:
+                        print("✅ Herramienta ejecutada exitosamente")
+                        print("✨ Generando respuesta personalizada...")
+                        final_answer = ask_claude_for_final_answer(tool_output_text, user_msg, server_name)
+                        
                 except Exception as e:
-                    final_answer = f"❌ Error ejecutando {tool_name} en {server_name}: {e}"
+                    print(f"⚠️ Excepción ejecutando herramienta: {e}")
+                    final_answer = ask_claude_basic_fallback(user_msg)
             else:
-                print("🤖 Respondiendo como asistente general...")
-                final_answer = ask_claude_general_fallback(user_msg)
+                if tool_name and server_name not in connected_servers:
+                    print(f"⚠️ Servidor {server_name} no está conectado")
+                print("💬 Respondiendo como asistente general...")
+                final_answer = ask_claude_basic_fallback(user_msg)
 
             print("\n" + "="*60)
             print("📋 RESPUESTA:")
@@ -512,13 +567,14 @@ async def main():
                 "timestamp": datetime.now().isoformat(),
                 "user": user_msg,
                 "tool_used": tool_name,
-                "server_used": server_name,
+                "server_used": server_name, 
                 "arguments": tool_args,
                 "tool_output": tool_output_text,
                 "final_answer": final_answer,
             }
             
             save_to_context(entry)
+            log_interaction(entry)
         
         except KeyboardInterrupt:
             print("\n\n🌟 ¡Hasta pronto!")
