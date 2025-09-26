@@ -1,294 +1,188 @@
-# MCPChatbot - Sistema de Belleza con Claude API
+# 🌟 Sistema MCP Completo - Proyecto Redes CC3067
 
-Un sistema de chat inteligente especializado en belleza y estilo personal, construido con arquitectura MVC y capacidades MCP (Model Context Protocol).
+**Universidad del Valle de Guatemala - Proyecto 1**  
+*Sistema completo de chatbots MCP con análisis de belleza, sueño y videojuegos*
 
-##  Características Principales
+## 🎯 Descripción General
 
-### Sistema de Belleza Avanzado
-- **Perfiles Personalizados**: Crea perfiles basados en tono de piel, color de ojos, tipo de cabello y preferencias de estilo
-- **Paletas de Colores Inteligentes**: Generación automática de paletas para ropa, maquillaje y accesorios
-- **Teoría del Color**: Algoritmos avanzados basados en colorimetría y armonías de color
-- **Recomendaciones Contextuales**: Sugerencias específicas según evento, estación y estilo personal
+Este proyecto implementa un sistema completo de chatbots usando **Model Context Protocol (MCP)** con múltiples servidores especializados. El sistema incluye análisis de belleza y colorimetría profesional, coaching de sueño, análisis de videojuegos, y manejo de archivos/Git.
 
-### Integración con Claude API
-- **Conversación Natural**: Chat fluido con Claude Haiku para consejos de belleza y estilo
-- **Contexto Personalizado**: Claude considera tu perfil personal en las recomendaciones
-- **Análisis Inteligente**: Evaluación de compatibilidad de colores y tendencias
+## 🏗️ Arquitectura del Sistema
 
-### Funcionalidades Adicionales
-- **Citas Inspiracionales**: Conexión con servidor remoto para motivación diaria
-- **Gestión de Archivos**: Sistema completo de archivos con soporte Git
-- **Historial Completo**: Seguimiento de paletas generadas y preferencias
-- **Logging Avanzado**: Registro detallado de todas las interacciones
-
-## 🏗️ Arquitectura
-
-### Estructura MVC
 ```
-src/
-├── models/                 # Modelos de datos
-│   ├── session_model.py   # Gestión de sesiones
-│   ├── beauty_model.py    # Datos de belleza y perfiles
-│   └── logging_model.py   # Sistema de logging
-├── views/                 # Interfaces de usuario
-│   ├── chat_view.py      # Vista principal del chat
-│   └── beauty_view.py    # Vista del sistema de belleza
-├── controllers/           # Lógica de control
-│   ├── main_controller.py     # Controlador principal
-│   ├── beauty_controller.py   # Controlador de belleza
-│   ├── quotes_controller.py   # Controlador de citas
-│   └── git_controller.py      # Controlador de archivos/git
-├── services/              # Servicios especializados
-│   ├── claude_service.py      # Servicio de Claude API
-│   ├── beauty_service.py      # Servicio de paletas avanzado
-│   └── remote_quotes_service.py # Servicio de citas remotas
-└── main.py               # Punto de entrada
+MCP Sistema/
+├── 📱 Clientes/                    # Diferentes interfaces de usuario
+│   ├── beauty_client.py           # Cliente especializado en belleza
+│   ├── Cliente_universal.py       # Cliente para múltiples servidores  
+│   └── beauty_client_hybrid.py    # Cliente local + remoto
+├── 🖥️ Servidores/
+│   ├── Local/                     # Servidores propios
+│   │   ├── beauty_server.py       # Análisis de belleza y colorimetría
+│   │   └── metodos_server.py      # Motor de colorimetría avanzado
+│   ├── Externos/                  # Servidores de compañeros
+│   │   ├── Fabi/                  # Sleep Coaching Server
+│   │   └── JP/                    # Game Analysis Server
+│   ├── Remoto/                    # Servidor deployed en Railway
+│   └── GitHub&files/              # Manejo de archivos y Git
+└── 📊 Data/                       # Almacenamiento de datos
 ```
 
-##  Instalación
+## 🚀 Funcionalidades Principales
+
+### 💄 **Beauty & Color Analysis Server**
+- **Análisis colorimétrico científico** basado en 8 estaciones de color
+- **Determinación de subtono** usando múltiples indicadores físicos
+- **Generación de paletas personalizadas** para ropa, maquillaje y accesorios
+- **Sistema de perfiles completos** con recomendaciones profesionales
+
+### 😴 **Sleep Coaching Server** 
+- **Análisis de patrones de sueño** personalizados
+- **Recomendaciones basadas en cronotipos** (alondra, búho, intermedio)
+- **Creación de rutinas de sueño** optimizadas
+- **Seguimiento y consejos rápidos** de higiene del sueño
+
+### 🎮 **Game Analysis Server**
+- **Análisis completo de videojuegos** con datos de ventas
+- **Rankings por género, plataforma y región**
+- **Estadísticas de publishers** y tendencias del mercado
+- **Búsqueda avanzada** con múltiples filtros
+
+### 📁 **File & Git Management**
+- **Operaciones completas de archivos** (crear, leer, modificar, buscar)
+- **Control de versiones Git** integrado
+- **Manejo seguro de repositorios** locales y remotos
+
+## 🔧 Instalación y Configuración
 
 ### Prerrequisitos
-- Python 3.8 o superior
-- Cuenta de Anthropic con API key
-- Git (opcional, para control de versiones)
-
-### Pasos de Instalación
-
-1. **Clonar el repositorio**
 ```bash
-git clone https://github.com/Maria-Villafuerte/MCP.git
+# Python 3.8+
+# Git instalado
+# Conexión a internet (para servidor remoto)
+```
+
+### Instalación
+```bash
+# 1. Clonar el repositorio
+git clone [tu-repo-url]
 cd MCP
-```
 
-2. **Crear entorno virtual**
-```bash
+# 2. Crear entorno virtual
 python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-```
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
 
-3. **Instalar dependencias**
-```bash
+# 3. Instalar dependencias
 pip install -r requirements.txt
+
+# 4. Configurar API Key
+# Crear archivo .env en la raíz:
+echo "ANTHROPIC_API_KEY=tu_api_key_aqui" > .env
 ```
 
-4. **Configurar variables de entorno**
+## 🎮 Guías de Uso
+
+### 🌸 **Para Análisis de Belleza Personal**
 ```bash
-cp .env.example .env
-# Editar .env con tu API key de Anthropic
+# Usar el cliente especializado en belleza
+python Clientes/beauty_client.py
 ```
 
-5. **Ejecutar el sistema**
+**Comandos principales:**
+- `"crear perfil"` - Análisis colorimétrico completo
+- `"generar paleta de maquillaje"` - Paletas personalizadas
+- `"paleta para trabajo"` - Colores profesionales
+- `"mostrar mi perfil"` - Ver análisis completo
+
+### 🌐 **Para Usar Múltiples Servidores**
 ```bash
-python main.py
+# Cliente universal (belleza + sueño + videojuegos)
+python Clientes/Cliente_universal.py
 ```
 
-##  Configuración
+**Ejemplos de comandos:**
+- `"crear perfil de belleza con ojos verdes y piel clara"`
+- `"necesito consejos para dormir mejor"`
+- `"cuáles son los mejores juegos de RPG"`
+- `"crear rutina de sueño para despertar a las 6 AM"`
 
-### Variables de Entorno (.env)
+### ☁️ **Para Servidor Remoto**
 ```bash
-# API Key de Anthropic (REQUERIDO)
-ANTHROPIC_API_KEY=tu_api_key_aqui
-
-# Modelo de Claude (opcional)
-CLAUDE_MODEL=claude-3-haiku-20240307
-
-# Configuración de logging (opcional)
-LOG_LEVEL=INFO
+# Cliente híbrido (local + Railway)
+python Clientes/beauty_client_hybrid.py
 ```
 
-### Configuración Avanzada
-- **Modelos disponibles**: claude-3-haiku-20240307, claude-3-sonnet-20240229, claude-3-opus-20240229
-- **Directorio de trabajo**: Se crea automáticamente en `mcp_workspace/`
-- **Logs**: Se guardan en el directorio `logs/`
-- **Sesiones**: Se almacenan en `sessions/`
-- **Datos de belleza**: Se guardan en `beauty_data/`
-
-##  Comandos Principales
-
-### Sistema de Belleza
+### 📁 **Para Archivos y Git**
 ```bash
-# Gestión de perfiles
-/beauty create_profile          # Crear perfil personalizado
-/beauty profile <user_id>       # Ver perfil específico
-/beauty list_profiles           # Listar todos los perfiles
-/beauty history <user_id>       # Ver historial de paletas
-
-# Generación de paletas
-/palette ropa <user_id> <evento>        # Paleta de ropa
-/palette maquillaje <user_id> <evento>  # Paleta de maquillaje
-/palette accesorios <user_id> <evento>  # Paleta de accesorios
-/palette quick <tipo> <evento>          # Paleta rápida sin perfil
+# Cliente de archivos y Git
+cd Servidores/GitHub&files/
+python chat_simple.py
 ```
 
-### Citas Inspiracionales
-```bash
-/quotes get [categoría]      # Obtener cita inspiracional
-/quotes tip                  # Consejo de belleza/bienestar
-/quotes search <palabra>     # Buscar citas
-/quotes wisdom               # Sabiduría diaria
+**Comandos Git:**
+- `"inicializar repositorio git"`
+- `"crear archivo README.md"`
+- `"hacer commit con mensaje 'inicial'"`
+- `"subir cambios a GitHub"`
+
+## 💡 Ejemplos de Conversaciones
+
+### 🎨 **Sesión de Análisis de Belleza**
+```
+Usuario: Quiero crear mi perfil de belleza
+Sistema: ¡Perfecto! Para crear tu análisis colorimétrico necesito algunos datos...
+
+Usuario: Soy María, piel media, venas azules, prefiero joyería de plata
+Sistema: ✅ Creando perfil... Tu análisis indica:
+- Subtono: FRÍO (85% confianza)
+- Estación: Verano Frío
+- Colores recomendados: Azules, rosas, morados...
+
+Usuario: Genera paleta de maquillaje para una boda
+Sistema: 🎨 Paleta "Elegancia de Verano":
+- Ojos: Azul real + Lavanda suave
+- Labios: Rosa frambuesa
+- Técnica: Maquillaje con difuminado natural...
 ```
 
-### Gestión de Archivos
-```bash
-# Filesystem
-/fs read <archivo>           # Leer archivo
-/fs write <archivo> <texto>  # Escribir archivo
-/fs list [directorio]        # Listar contenido
-
-# Git (si está disponible)
-/git init                    # Inicializar repositorio
-/git add <archivo>           # Agregar al staging
-/git commit "<mensaje>"      # Hacer commit
-/git status                  # Ver estado
-```
-
-### Sistema
-```bash
-/help                        # Ayuda completa
-/stats                       # Estadísticas de uso
-/log                         # Ver log de interacciones
-/context                     # Ver contexto actual
-/clear                       # Limpiar contexto
-/save                        # Guardar sesión
-/quit                        # Salir
-```
-
-##  Ejemplos de Uso
-
-### Crear Perfil Personal
-```bash
-Usuario: /beauty create_profile
-
-Sistema:  CREACIÓN DE PERFIL DE BELLEZA
-=========================================
- ID de usuario: maria_123
- Nombre completo: María García
- Tono de piel: 
-  1. clara
-  2. media  
-  3. oscura
-Selección: 2
-
-[Continúa recopilando datos...]
-```
-
-### Generar Paleta de Ropa
-```bash
-Usuario: /palette ropa maria_123 trabajo
-
-Sistema:  PREFERENCIAS PARA PALETA DE ROPA
-Evento: Trabajo
- Estación del año:
-  1. primavera
-  2. verano
-  3. otoño
-  4. invierno
-Selección: 2
-
-[Genera paleta personalizada...]
-```
-
-### Conversación Natural
-```bash
-Usuario: ¿Qué colores me quedan bien para una entrevista de trabajo?
-
-Claude: Para una entrevista de trabajo, te recomiendo colores que proyecten 
-profesionalismo y confianza. ¿Tienes un perfil creado? Esto me ayudaría 
-a darte recomendaciones más precisas basadas en tu tono de piel y 
-características personales.
-
-Para recomendaciones generales:
-- Azul marino: transmite confianza y estabilidad
-- Gris carbón: elegante y profesional
-- Blanco o crema: limpio y sofisticado
-
-¿Te gustaría crear un perfil personal con /beauty create_profile para 
-obtener recomendaciones más específicas?
-```
-
-##  Desarrollo
-
-### Estructura de Clases Principales
-
-#### BeautyService
-- `generate_advanced_palette()`: Generación de paletas con algoritmos avanzados
-- `ColorTheoryEngine`: Motor de teoría del color
-- `PaletteGenerator`: Generador específico por categoría
-
-#### ClaudeService
-- `send_message()`: Comunicación con Claude API
-- `send_beauty_context_message()`: Mensajes con contexto de belleza
-- `analyze_color_compatibility()`: Análisis de compatibilidad de colores
-
-#### BeautyModel
-- `BeautyProfile`: Dataclass para perfiles de usuario
-- `ColorPalette`: Dataclass para paletas generadas
-- Base de datos de colores y características
-
-### Testing
-```bash
-# Ejecutar tests individuales
-python src/models/beauty_model.py
-python src/services/claude_service.py
-python src/controllers/beauty_controller.py
-
-# Tests con pytest (si está instalado)
-pytest tests/
-```
 
 ## 🌐 Servidor Remoto
 
-El sistema se conecta a un servidor MCP remoto para citas inspiracionales:
-- **Link**: https://web-production-de5ff.up.railway.app
-- **Funcionalidad**: Citas, consejos de bienestar, sabiduría diaria
-- **Fallback**: Si no está disponible, usa citas locales
+**URL del servidor desplegado:** https://beauty-pallet-server.railway.app
 
-## 📊 Monitoreo y Logs
+**Endpoints disponibles:**
+- `GET /` - Página principal
+- `GET /health` - Estado del servidor
+- `POST /mcp/create-profile` - Crear perfil MCP
+- `POST /api/generate-palette` - Generar paletas
+- `GET /docs` - Documentación Swagger
 
-### Tipos de Logs
-- **Interacciones generales**: `logs/interactions.log`
-- **Interacciones MCP**: `logs/mcp_interactions.json`
-- **Sistema de belleza**: `logs/beauty_interactions.json`
-- **Errores**: `logs/errors.log`
+## 📊 Especificaciones Técnicas
 
-### Estadísticas Disponibles
-- Número de perfiles creados
-- Paletas generadas por tipo y evento
-- Tasa de éxito de operaciones MCP
-- Tiempo de sesión y mensajes procesados
+### **Beauty Server (Propio)**
+- **Análisis científico** de subtono con 4 indicadores
+- **8 estaciones de color** (Primavera Cálida/Clara, Verano Suave/Frío, etc.)
+- **Teoría de armonías cromáticas** para paletas optimizadas
+- **Almacenamiento JSON** con historial completo
 
-##  Solución de Problemas
+### **Sleep Coach Server (Fabi)**
+- **Algoritmo de cronotipos** para personalización
+- **Análisis de patrones** con recomendaciones científicas
+- **Rutinas semanales** optimizadas por perfil
+- **Base de conocimientos** de higiene del sueño
 
-### Errores Comunes
+### **Game Server (JP)**
+- **Dataset de +16,000 videojuegos** con análisis pandas
+- **Múltiples filtros** (género, plataforma, año, región)
+- **Rankings dinámicos** de publishers y ventas
+- **API RESTful** para consultas complejas
 
-**Error: ANTHROPIC_API_KEY no encontrada**
-```bash
-# Verifica que el archivo .env existe y contiene la API key
-cat .env
-# Debe mostrar: ANTHROPIC_API_KEY=tu_api_key_aqui
-```
+## 📈 Logs y Monitoreo
 
-**Error: Servidor remoto no disponible**
-```bash
-# El sistema funciona en modo fallback con citas locales
-# Verifica conexión a internet y estado del servidor con:
-/quotes status
-```
+Todos los clientes generan logs detallados:
+- `Data/beauty_log.txt` - Interacciones de belleza
+- `Data/universal_log.txt` - Cliente universal
+- `Data/beauty_context.json` - Contexto y memoria
 
-**Error: Git no disponible**
-```bash
-# Instala Git en tu sistema:
-# Windows: https://git-scm.com/download/win
-# macOS: brew install git
-# Linux: apt-get install git
-```
-
-### Logging de Depuración
-```bash
-# Activar logging detallado
-export LOG_LEVEL=DEBUG
-python main.py
-
-# Ver logs en tiempo real
-tail -f logs/interactions.log
-```
