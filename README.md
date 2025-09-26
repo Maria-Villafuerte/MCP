@@ -64,7 +64,7 @@ MCP Sistema/
 ### Instalación
 ```bash
 # 1. Clonar el repositorio
-git clone [tu-repo-url]
+git clone https://github.com/Maria-Villafuerte/MCP.git 
 cd MCP
 
 # 2. Crear entorno virtual
